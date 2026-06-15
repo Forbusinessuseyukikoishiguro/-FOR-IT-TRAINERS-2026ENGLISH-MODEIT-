@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>うさうさ ENGLISH MODE｜オンライン英語チャット＆発音フィードバック</title>
+<style>
+  :root{
+    --rose:#9B3D6E; --rose-dp:#6E2A4E; --gold:#C9A24E; --gold-dk:#9A7A2E;
+    --rose-tint:#F7EDF3; --gold-tint:#FBF3E3; --panel:#F4EBF1; --paper:#FBF6F1;
+    --ink:#33252E; --muted:#8A7A84; --line:#E7D5DF; --white:#fff;
+    --learner:#3F7E8C; --trainer:#9B3D6E;
+    --purple:#5C3A7A; --purple-tint:#EFE7F5; --exam:#2E6E7A; --exam-tint:#E3F0F2;
+    --jp:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    --en:Georgia,"Times New Roman",serif;
+    --shadow:0 6px 20px rgba(110,42,78,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--jp);line-height:1.6;
+    background-image:radial-gradient(circle at 12% -5%,rgba(201,162,78,.10),transparent 40%),radial-gradient(circle at 100% 0%,rgba(155,61,110,.10),transparent 35%);}
+  .wrap{max-width:880px;margin:0 auto;padding:0 16px 80px}
+  .cover{background:var(--rose);color:#fff;border-radius:0 0 22px 22px;padding:24px 24px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .cover::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
+  .issue{font-size:12px;letter-spacing:.22em;color:var(--gold-tint);font-weight:700}
+  .masthead{font-family:var(--en);font-size:clamp(32px,8vw,56px);font-weight:700;letter-spacing:.04em;margin:2px 0;line-height:1}
+  .sub{font-weight:700;font-size:clamp(14px,3.4vw,17px)}
+  .tagline{font-size:12.5px;color:#F3E4EE;margin-top:6px}
+  .sensei{display:flex;gap:10px;align-items:center;margin-top:14px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px}
+  .sensei .f{font-size:24px} .sensei .s{font-size:13px;font-weight:600}
+
+  .audbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 4px}
+  .audbar .lbl{font-weight:800;color:var(--rose-dp);font-size:13px}
+  .aud{appearance:none;border:1.5px solid var(--line);background:#fff;color:var(--rose-dp);font-family:var(--jp);font-weight:800;font-size:13px;border-radius:999px;padding:8px 14px;cursor:pointer}
+  .aud[aria-pressed="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
+  .aud:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  nav.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 6px;position:sticky;top:0;background:linear-gradient(var(--paper) 72%,transparent);padding:10px 0;z-index:5}
+  .tab{appearance:none;border:1.5px solid var(--line);background:#fff;color:var(--rose-dp);font-family:var(--jp);font-weight:800;font-size:13px;border-radius:999px;padding:9px 13px;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
+  .tab:hover{border-color:var(--gold)} .tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .tab.purple{color:var(--purple);border-color:#E3D5EE}
+  .tab.purple:hover{border-color:var(--purple)}
+  .tab.purple[aria-selected="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .tab.exam{color:var(--exam);border-color:#CFE6EA}
+  .tab.exam:hover{border-color:var(--exam)}
+  .tab.exam[aria-selected="true"]{background:var(--exam);color:#fff;border-color:var(--exam)}
+  section.view{display:none;animation:fade .25s} section.view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+
+  .voicebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--rose-tint);border-radius:12px;padding:9px 12px;margin:8px 0 14px;font-size:13px}
+  .voicebar label{font-weight:800;color:var(--rose-dp)}
+  select{border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;color:var(--ink);font-weight:600;font-family:var(--jp);max-width:100%}
+  input[type=range]{accent-color:var(--rose)}
+
+  .kick{font-size:11.5px;letter-spacing:.16em;color:var(--gold-dk);font-weight:800;margin:8px 0 2px}
+  h3.head{font-size:19px;color:var(--rose-dp);margin:.1em 0 .2em}
+  .lead{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 14px}
+  .chip{appearance:none;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-family:var(--jp);font-weight:700;font-size:12.5px;border-radius:999px;padding:7px 12px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--gold-tint);border-color:var(--gold);color:var(--gold-dk)}
+  .chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .catlabel{font-weight:800;color:var(--rose-dp);margin:16px 0 6px;font-size:15px;border-bottom:2px solid var(--gold-tint);padding-bottom:4px}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin:8px 0;box-shadow:var(--shadow)}
+  .card .meta{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-weight:800;color:#fff;border-radius:999px;padding:2px 9px}
+  .tag.l{background:var(--learner)} .tag.t{background:var(--trainer)} .tag.b{background:var(--gold-dk)}
+  .tag.tool{background:#5A4763}
+  .en{font-family:var(--en);font-size:clamp(17px,4.2vw,21px);font-weight:700;color:var(--rose-dp);line-height:1.35}
+  .kana{color:var(--gold-dk);font-weight:700;font-size:13px;margin-top:3px}
+  .ja{font-size:13.5px;margin-top:4px}
+  .row{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .b1{appearance:none;border:none;background:var(--rose);color:#fff;font-weight:800;font-size:12.5px;border-radius:10px;padding:7px 13px;cursor:pointer;font-family:var(--jp)}
+  .b1:hover{background:var(--rose-dp)} .b1:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .b2{appearance:none;border:1.5px solid var(--line);background:#fff;color:var(--rose-dp);font-weight:800;font-size:12.5px;border-radius:10px;padding:7px 13px;cursor:pointer;font-family:var(--jp)}
+  .b2:hover{border-color:var(--gold)} .b2:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  /* subtabs (⑰) */
+  .subtabs{display:flex;gap:8px;margin:6px 0 14px;flex-wrap:wrap}
+  .subtab{appearance:none;border:1.5px solid #E3D5EE;background:#fff;color:var(--purple);font-family:var(--jp);font-weight:800;font-size:13px;border-radius:10px;padding:9px 15px;cursor:pointer}
+  .subtab[aria-selected="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .subtab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .statbar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
+  .stat{flex:1;min-width:92px;text-align:center;border-radius:14px;padding:12px 8px;color:#fff;font-weight:800;font-size:12.5px;box-shadow:var(--shadow)}
+  .stat .n{font-size:24px;display:block;line-height:1.1;margin-bottom:2px}
+  .stat.ok{background:#4F8A6B}.stat.ng{background:#E5557A}.stat.pct{background:var(--purple)}
+
+  /* pronunciation FB */
+  .selrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .mic{background:var(--gold);color:#3a2a00}
+  .mic.rec{background:#E5557A;color:#fff;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(229,85,122,.5)}50%{box-shadow:0 0 0 10px rgba(229,85,122,0)}}
+  .heard{font-size:13px;color:var(--muted);margin:8px 0}
+  .fb{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px}
+  .score{display:inline-grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--rose-tint);font-weight:900;font-size:21px;border:3px solid var(--rose)}
+  .fbtxt{flex:1;min-width:200px;font-size:13.5px} .fbtxt b{color:var(--rose-dp)}
+  .manual{display:flex;gap:8px;margin-top:8px}
+  .manual input{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:var(--jp);background:#fff;color:var(--ink)}
+  .spin{display:inline-block;width:15px;height:15px;border:3px solid var(--rose);border-top-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+  .qprog{height:9px;background:var(--panel);border-radius:999px;overflow:hidden;margin-bottom:12px}
+  .qprog>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--rose));width:0;transition:.3s}
+  .qprompt{font-size:18px;font-weight:800;color:var(--rose-dp);margin-bottom:2px}
+  .qkana{color:var(--gold-dk);font-size:12.5px;margin-bottom:10px}
+  .no-kana .kana,.no-kana .qkana{display:none}
+  .qopt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-family:var(--jp);font-size:14px;border-radius:11px;padding:11px 14px;margin:7px 0;cursor:pointer}
+  .qopt.en{font-family:var(--en);font-weight:700}
+  .qopt:hover{border-color:var(--gold)} .qopt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .qopt.correct{background:#EAF4EE;border-color:#4F8A6B;color:#2f6b4d;font-weight:700}
+  .qopt.wrong{background:#FBECEC;border-color:#E5557A;color:#A23A48}
+  .qopt:disabled{cursor:default}
+  .qfb{margin-top:10px;font-weight:800;font-size:14px}
+  .qend{text-align:center;background:linear-gradient(135deg,var(--rose),var(--rose-dp));color:#fff;border-radius:16px;padding:22px}
+  .qend .big{font-size:24px;font-weight:900;margin-bottom:4px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--rose-dp);color:#fff;font-weight:700;font-size:13px;padding:10px 16px;border-radius:999px;box-shadow:var(--shadow);opacity:0;transition:.25s;z-index:50}
+  .toast.show{opacity:1}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="cover">
+    <div class="issue">うさうさ研修工房 ｜ FOR IT TRAINERS ｜ v2.0 ｜ 2026.06.15</div>
+    <div class="masthead">ENGLISH MODE</div>
+    <div class="sub">IT研修講師のための 英語フレーズ 発音＆暗記ジェネレーター</div>
+    <div class="tagline">ほめて伸ばす。否定しない。自分のペースで、楽しく前向きに。</div>
+    <div class="sensei"><span class="f">🐰</span><span class="s" id="say">オンライン会議・チャットで使う英語を、受講生／講師どちらの目線でも。📋でコピーして貼れるよ。</span></div>
+  </header>
+
+  <div class="audbar">
+    <span class="lbl">だれの目線で？</span>
+    <button class="aud" id="aAll" aria-pressed="true">👥 両方</button>
+    <button class="aud" id="aL" aria-pressed="false">🎓 受講生向け</button>
+    <button class="aud" id="aT" aria-pressed="false">🏫 講師向け</button>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  data-v="tool">① ツール別</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="rensou">② 報連相・提案</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="confirm">③ 確認（理解・設計）</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="mtg">④ MTG・アナウンス</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="python">⑤ Pythonレッスン</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="lpic">⑥ LPICレッスン</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="trouble">⑦ トラブル時</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="preempt">⑧ つまずき先回り</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="progress">⑨ 進捗・日報</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="biz">⑩ 研修ビジネス</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="coach">⑪ コーチング</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="hint">⑫ 学習ヒント</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="pron">⑬ 発音フィードバック</button>
+    <button class="tab" role="tab" aria-selected="false" data-v="test">⑭ 暗記テスト</button>
+    <button class="tab purple" role="tab" aria-selected="false" data-v="learner">⑮ 受講生向け</button>
+    <button class="tab purple" role="tab" aria-selected="false" data-v="teacher">⑯ 講師が使う言葉</button>
+    <button class="tab purple" role="tab" aria-selected="false" data-v="fb">⑰ 回答FB</button>
+    <button class="tab exam" role="tab" aria-selected="false" data-v="oral">⑱ 口頭試問</button>
+    <button class="tab exam" role="tab" aria-selected="false" data-v="written">⑲ 筆記試験</button>
+    <button class="tab exam" role="tab" aria-selected="false" data-v="quiz">⑳ 理解度クイズ</button>
+    <button class="tab exam" role="tab" aria-selected="false" data-v="grade">㉑ 解答・採点</button>
+    <button class="tab exam" role="tab" aria-selected="false" data-v="timing">㉒ 時間・進行</button>
+  </nav>
+
+  <div class="voicebar">
+    <label for="voiceSel">🔊 発音バリエーション</label>
+    <select id="voiceSel"><option>読み込み中…</option></select>
+    <label for="rate" style="margin-left:6px">速さ</label>
+    <input id="rate" type="range" min="0.6" max="1.0" step="0.05" value="0.9">
+    <span id="rateVal" style="color:var(--muted);font-weight:700">0.90x</span>
+    <button class="aud" id="kanaToggle" aria-pressed="true" style="margin-left:auto;font-size:12.5px">フリガナ：表示</button>
+    <button class="aud" id="autoToggle" aria-pressed="false" style="font-size:12.5px">🔊自動再生：OFF</button>
+  </div>
+
+  <section class="view active" id="v-tool">
+    <div class="kick">ONLINE TOOLS</div><h3 class="head">ツール別 ひとことフレーズ</h3>
+    <p class="lead">Zoom / Google Meet / oVice / Slack で“サッと言える／貼れる”英語。📋コピー・🔊発音。</p>
+    <div class="chips" id="toolChips"></div>
+    <div id="toolList"></div>
+  </section>
+  <section class="view" id="v-rensou">
+    <div class="kick">REPORT / SHARE / CONSULT / PROPOSE</div><h3 class="head">報告・連絡・相談・提案</h3>
+    <p class="lead">チャットやメッセージにそのまま使える、やわらかい言い方。</p>
+    <div id="rensouList"></div>
+  </section>
+  <section class="view" id="v-confirm">
+    <div class="kick">CONFIRMATION</div><h3 class="head">認識・理解の確認／教育設計の確認</h3>
+    <p class="lead">「合ってますか？」を角を立てずに。設計レビューにも。</p>
+    <div id="confirmList"></div>
+  </section>
+  <section class="view" id="v-mtg">
+    <div class="kick">MEETINGS &amp; ANNOUNCEMENTS</div><h3 class="head">講師MTG／受講生アナウンス</h3>
+    <p class="lead">講師ミーティングの進行と、受講生への連絡テンプレ。</p>
+    <div id="mtgList"></div>
+  </section>
+
+  <section class="view" id="v-python">
+    <div class="kick">PYTHON LESSON</div><h3 class="head">Pythonレッスン フレーズ集（受講生＋講師の説明フレーズ）</h3>
+    <p class="lead">基礎〜応用（関数定義・例外処理・pandas）。上の目線トグルで🎓受講生の質問／🏫講師の説明を切替。📋コピー・🔊発音。</p>
+    <div id="pythonList"></div>
+  </section>
+  <section class="view" id="v-lpic">
+    <div class="kick">LPIC / LINUX LESSON</div><h3 class="head">LPICレッスン フレーズ集（受講生＋講師の説明フレーズ）</h3>
+    <p class="lead">基礎＋科目別（権限・プロセス・ネットワーク・シェルスクリプト）。目線トグルで🎓受講生／🏫講師を切替。📋コピー・🔊発音。</p>
+    <div id="lpicList"></div>
+  </section>
+
+  <section class="view" id="v-trouble">
+    <div class="kick">WHEN THINGS GO WRONG</div><h3 class="head">トラブル時の英語</h3>
+    <p class="lead">接続が切れた・画面が固まった・環境に入れない…そんな時の落ち着いた言い方。</p>
+    <div id="troubleList"></div>
+  </section>
+  <section class="view" id="v-preempt">
+    <div class="kick">PREEMPT THE STUMBLE（講師向け）</div><h3 class="head">つまずき先回り 一言集</h3>
+    <p class="lead">受講生がつまずく前に、安心させる・予告する講師の一言。否定せず、前向きに。</p>
+    <div id="preemptList"></div>
+  </section>
+
+  <section class="view" id="v-progress">
+    <div class="kick">PROGRESS &amp; DAILY REPORT</div><h3 class="head">進捗報告・日報の英語</h3>
+    <p class="lead">受講生は自分の進捗を、講師はクラスの状況・日報を。目線トグルで切替。</p>
+    <div id="progressList"></div>
+  </section>
+  <section class="view" id="v-biz">
+    <div class="kick">TRAINING BUSINESS</div><h3 class="head">研修ビジネス英語</h3>
+    <p class="lead">カリキュラム設計（レベル・業種別）／経営層・現場ヒアリングと課題整理／フォローアップ・継続支援／成功させるMTG。</p>
+    <div id="bizList"></div>
+  </section>
+  <section class="view" id="v-coach">
+    <div class="kick">COACHING（講師向け）</div><h3 class="head">前向きコーチング英語</h3>
+    <p class="lead">否定せず問いかけで導く。Why／What／Howで理解を確認、ヒント、そして「惜しい！」の言い方。</p>
+    <div id="coachList"></div>
+  </section>
+  <section class="view" id="v-hint">
+    <div class="kick">LEARNING HINTS</div><h3 class="head">学習ヒント（文系／理系）</h3>
+    <p class="lead">つまずいた受講生に渡す“つかみ方”のヒント。文系・理系の得意に合わせて。</p>
+    <div id="hintList"></div>
+  </section>
+
+  <section class="view" id="v-pron">
+    <div class="kick">PRONUNCIATION FEEDBACK</div><h3 class="head">発音フィードバック（ほめて伸ばす）</h3>
+    <p class="lead">お手本を聞く → 話す → AIがやさしく添削。間違いはありません。前向きにいこう🐰</p>
+    <div class="selrow">
+      <select id="pronSel" aria-label="練習するフレーズ"></select>
+      <button class="b1" id="pPlay">🔊 お手本</button>
+      <button class="b1 mic" id="pMic">🎤 話す</button>
+    </div>
+    <div class="heard" id="heard"></div>
+    <div id="fbArea"></div>
+    <div class="manual" id="manualWrap" style="display:none">
+      <input id="manualIn" placeholder="マイクが使えない時は、言ったつもりの英語を入力">
+      <button class="b2" id="manualGo">添削</button>
+    </div>
+    <div class="note" id="pronNote"></div>
+  </section>
+
+  <section class="view" id="v-test">
+    <div class="kick">MEMORY TEST</div><h3 class="head">フレーズ集 覚えたかテスト</h3>
+    <p class="lead">選んだ範囲から4択で出題。まちがいは“伸びしろ”、否定しません🐰　意味↔英語を切替できます。</p>
+    <div class="chips" id="testScope"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px;align-items:center">
+      <button class="aud" id="dirJaEn" aria-pressed="true">意味 → 英語</button>
+      <button class="aud" id="dirEnJa" aria-pressed="false">英語 → 意味</button>
+      <button class="b1" id="testStart">▶ テスト開始</button>
+    </div>
+    <div id="testBody"></div>
+    <div id="weakPanel" style="margin-top:18px"></div>
+  </section>
+
+  <!-- ⑮ 受講生向け -->
+  <section class="view" id="v-learner">
+    <div class="kick" style="color:var(--purple)">FOR LEARNERS</div>
+    <h3 class="head" style="color:var(--purple)">受講生向け フレーズ（全カテゴリ横断）</h3>
+    <p class="lead">受講生が使うフレーズだけを集約。カテゴリで絞り込み。各カードに分野タグ付き。📋コピー・🔊発音。</p>
+    <div class="chips" id="learnerChips"></div>
+    <div id="learnerList"></div>
+  </section>
+
+  <!-- ⑯ 講師が使う言葉 -->
+  <section class="view" id="v-teacher">
+    <div class="kick" style="color:var(--purple)">FOR TRAINERS</div>
+    <h3 class="head" style="color:var(--purple)">講師が使う言葉（全カテゴリ横断）</h3>
+    <p class="lead">講師フレーズだけを集約。コーチング・MTG・ビジネス・先回り・試験運営まで横断して一覧。</p>
+    <div class="chips" id="teacherChips"></div>
+    <div id="teacherList"></div>
+  </section>
+
+  <!-- ⑰ 回答フィードバック -->
+  <section class="view" id="v-fb">
+    <div class="kick" style="color:var(--purple)">ANSWER FEEDBACK</div>
+    <h3 class="head" style="color:var(--purple)">回答フィードバック</h3>
+    <div class="subtabs">
+      <button class="subtab" data-sub="pre" aria-selected="true">📋 テスト前（プレビュー）</button>
+      <button class="subtab" data-sub="post" aria-selected="false">📊 テスト後（結果まとめ）</button>
+    </div>
+    <div id="fbPre"></div>
+    <div id="fbPost" style="display:none"></div>
+  </section>
+
+  <!-- ⑱ 口頭試問 -->
+  <section class="view" id="v-oral">
+    <div class="kick" style="color:var(--exam)">ORAL EXAM ※PSYCHOLOGICAL SAFETY</div>
+    <h3 class="head" style="color:var(--exam)">口頭試問の英語（※心理的安全に配慮）</h3>
+    <p class="lead">合否で脅かさない。「わからない」も歓迎。安心して話せる口頭確認の言い回し。</p>
+    <div id="oralList"></div>
+  </section>
+
+  <!-- ⑲ 筆記試験 -->
+  <section class="view" id="v-written">
+    <div class="kick" style="color:var(--exam)">WRITTEN EXAM</div>
+    <h3 class="head" style="color:var(--exam)">筆記試験の英語</h3>
+    <p class="lead">開始・指示・見直し・終了の進行。部分点や減点なしを伝えて、安心して取り組ませる。</p>
+    <div id="writtenList"></div>
+  </section>
+
+  <!-- ⑳ 理解度クイズ -->
+  <section class="view" id="v-quiz">
+    <div class="kick" style="color:var(--exam)">COMPREHENSION CHECK ※SAFETY</div>
+    <h3 class="head" style="color:var(--exam)">理解度クイズの英語（※心理的安全に配慮）</h3>
+    <p class="lead">成績でなく“どこをゆっくり進めるか”を見るため。間違いは講師の説明し直しサイン。</p>
+    <div id="quizList"></div>
+  </section>
+
+  <!-- ㉑ 解答・採点 -->
+  <section class="view" id="v-grade">
+    <div class="kick" style="color:var(--exam)">ANSWERS &amp; GRADING</div>
+    <h3 class="head" style="color:var(--exam)">解答・採点・フィードバックの英語</h3>
+    <p class="lead">正解の確認、部分点、よくある間違いの共有。考え方をほめてから直す。</p>
+    <div id="gradeList"></div>
+  </section>
+
+  <!-- ㉒ 時間・進行 -->
+  <section class="view" id="v-timing">
+    <div class="kick" style="color:var(--exam)">TIME &amp; PACING</div>
+    <h3 class="head" style="color:var(--exam)">時間・進行の英語</h3>
+    <p class="lead">残り時間の告知、ペース調整、予告ワーニング。レッスンを気持ちよく回す。</p>
+    <div id="timingList"></div>
+  </section>
+
+  <footer>うさうさ ENGLISH MODE ｜ オンライン英語チャット＆発音 ｜ うさうさ研修工房 🐰<br>
+  ※発音添削のAIはClaude上で動きます。繋がらない時も、簡易フィードバックで前向きに。<br>
+  <span style="opacity:.8">v2.0 ｜ 2026.06.15 刻印 ｜ © うさうさ研修工房</span></footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1400);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+async function copy(t){try{await navigator.clipboard.writeText(t);}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove();}toast("コピーしました📋 貼り付けOK");}
+
+/* ---- data ---- */
+// aud: l=受講生 t=講師 b=両方
+const P=[
+ // tool
+ {c:"tool",t:"Zoom",aud:"b",en:"Can you hear me okay?",k:"キャン ユー ヒア ミー オウケイ？",j:"声、聞こえていますか？"},
+ {c:"tool",t:"Zoom",aud:"t",en:"I'll share my screen now.",k:"アイル シェア マイ スクリーン ナウ",j:"画面を共有しますね。"},
+ {c:"tool",t:"Zoom",aud:"t",en:"Please mute yourself when you're not speaking.",k:"プリーズ ミュート ユアセルフ ウェン ユア ノット スピーキング",j:"話さない時はミュートにしてください。"},
+ {c:"tool",t:"Zoom",aud:"b",en:"You're on mute.",k:"ユア オン ミュート",j:"ミュートになっていますよ。"},
+ {c:"tool",t:"Zoom",aud:"l",en:"Could you put me in a breakout room?",k:"クッジュー プット ミー イン ア ブレイクアウト ルーム？",j:"ブレイクアウトルームに入れてもらえますか？"},
+ {c:"tool",t:"Meet",aud:"t",en:"Let me turn on captions.",k:"レッ ミー ターン オン キャプションズ",j:"字幕をオンにしますね。"},
+ {c:"tool",t:"Meet",aud:"t",en:"Can you see my screen now?",k:"キャン ユー スィー マイ スクリーン ナウ？",j:"画面、見えていますか？"},
+ {c:"tool",t:"Meet",aud:"b",en:"I'll drop the link in the chat.",k:"アイル ドロップ ザ リンク イン ザ チャット",j:"リンクをチャットに貼りますね。"},
+ {c:"tool",t:"oVice",aud:"t",en:"I'll come over to your area.",k:"アイル カム オウバー トゥ ユア エリア",j:"そちらのエリアに行きますね。"},
+ {c:"tool",t:"oVice",aud:"t",en:"Move your avatar closer to talk.",k:"ムーヴ ユア アヴァター クローサー トゥ トーク",j:"アバターを近づけると話せますよ。"},
+ {c:"tool",t:"oVice",aud:"b",en:"I'm in the meeting space now.",k:"アイム イン ザ ミーティング スペイス ナウ",j:"いま会議スペースにいます。"},
+ {c:"tool",t:"Slack",aud:"b",en:"Quick question in the thread.",k:"クウィック クエスチョン イン ザ スレッド",j:"スレッドに簡単な質問です。"},
+ {c:"tool",t:"Slack",aud:"b",en:"I'll follow up in a DM.",k:"アイル フォロー アップ イン ア ディーエム",j:"DMで追って連絡します。"},
+ {c:"tool",t:"Slack",aud:"t",en:"Could you react with a checkmark when done?",k:"クッジュー リアクト ウィズ ア チェックマーク ウェン ダン？",j:"終わったら✅で反応してもらえますか？"},
+ {c:"tool",t:"Slack",aud:"t",en:"Thanks! Marking this as resolved.",k:"サンクス！ マーキング ディス アズ リゾルヴド",j:"ありがとう！解決済みにします。"},
+ // rensou
+ {c:"rensou",sub:"報告（Report）",aud:"l",en:"Quick update: the exercise is done.",k:"クウィック アップデイト：ジ エクササイズ イズ ダン",j:"進捗共有です。演習が完了しました。"},
+ {c:"rensou",sub:"報告（Report）",aud:"l",en:"I've finished step 3. Moving on to step 4.",k:"アイヴ フィニッシュト ステップ スリー。ムーヴィング オン トゥ ステップ フォー",j:"ステップ3完了、4に進みます。"},
+ {c:"rensou",sub:"連絡（Inform）",aud:"b",en:"Heads up: I'll be about 5 minutes late.",k:"ヘッズ アップ：アイル ビー アバウト ファイヴ ミニッツ レイト",j:"連絡です。5分ほど遅れます。"},
+ {c:"rensou",sub:"連絡（Inform）",aud:"t",en:"FYI, I've shared the materials in the channel.",k:"エフワイアイ、アイヴ シェアド ザ マテリアルズ イン ザ チャネル",j:"共有です。資料をチャンネルに上げました。"},
+ {c:"rensou",sub:"相談（Consult）",aud:"b",en:"Can I ask for your advice on this?",k:"キャン アイ アスク フォー ユア アドヴァイス オン ディス？",j:"これについて相談してもいいですか？"},
+ {c:"rensou",sub:"相談（Consult）",aud:"l",en:"I'm a bit stuck. Could we talk for a minute?",k:"アイム ア ビット スタック。クッ ウィー トーク フォー ア ミニット？",j:"少し詰まっています。少しお話できますか？"},
+ {c:"rensou",sub:"提案（Propose）",aud:"b",en:"How about we try it this way?",k:"ハウ アバウト ウィー トライ イット ディス ウェイ？",j:"こうやってみるのはどうでしょう？"},
+ {c:"rensou",sub:"提案（Propose）",aud:"b",en:"May I suggest a small change?",k:"メイ アイ サジェスト ア スモール チェンジ？",j:"小さな提案をしてもいいですか？"},
+ {c:"rensou",sub:"提案（Propose）",aud:"t",en:"Would it help if we added an example?",k:"ウッ イット ヘルプ イフ ウィー アディッド アン エグザンプル？",j:"例を足すと分かりやすいですか？"},
+ // confirm
+ {c:"confirm",sub:"認識・理解の確認",aud:"b",en:"Just to confirm, you mean ___, right?",k:"ジャスト トゥ コンファーム、ユー ミーン …、ライト？",j:"確認ですが、〜ということですね？"},
+ {c:"confirm",sub:"認識・理解の確認",aud:"t",en:"Does that make sense so far?",k:"ダズ ザット メイク センス ソー ファー？",j:"ここまで大丈夫ですか？"},
+ {c:"confirm",sub:"認識・理解の確認",aud:"t",en:"Can you walk me through your understanding?",k:"キャン ユー ウォーク ミー スルー ユア アンダースタンディング？",j:"理解を順番に説明してもらえますか？"},
+ {c:"confirm",sub:"認識・理解の確認",aud:"l",en:"I want to make sure I got this right.",k:"アイ ウォント トゥ メイク シュア アイ ガット ディス ライト",j:"認識が合っているか確かめたいです。"},
+ {c:"confirm",sub:"教育設計の確認",aud:"t",en:"What's the learning goal for this session?",k:"ワッツ ザ ラーニング ゴール フォー ディス セッション？",j:"このコマの学習ゴールは何ですか？"},
+ {c:"confirm",sub:"教育設計の確認",aud:"t",en:"Should this be a demo or a hands-on?",k:"シュッ ディス ビー ア デモ オア ア ハンズオン？",j:"ここはデモ？それとも実習？"},
+ {c:"confirm",sub:"教育設計の確認",aud:"t",en:"How will we check if they understood?",k:"ハウ ウィル ウィー チェック イフ ゼイ アンダーストゥッド？",j:"理解度はどう確認しますか？"},
+ {c:"confirm",sub:"教育設計の確認",aud:"t",en:"Is the level right for beginners?",k:"イズ ザ レベル ライト フォー ビギナーズ？",j:"入門者にレベルは適切ですか？"},
+ {c:"confirm",sub:"教育設計の確認",aud:"t",en:"Let's align on the agenda first.",k:"レッツ アライン オン ジ アジェンダ ファースト",j:"まず議題をすり合わせましょう。"},
+ // mtg
+ {c:"mtg",sub:"講師MTG",aud:"t",en:"Let's start with a quick check-in.",k:"レッツ スタート ウィズ ア クウィック チェックイン",j:"軽い近況共有から始めましょう。"},
+ {c:"mtg",sub:"講師MTG",aud:"t",en:"Can we align on who covers what?",k:"キャン ウィー アライン オン フー カバーズ ワット？",j:"担当の分担をすり合わせできますか？"},
+ {c:"mtg",sub:"講師MTG",aud:"t",en:"Let's park that and move on.",k:"レッツ パーク ザット アンド ムーヴ オン",j:"それは一旦保留して進みましょう。"},
+ {c:"mtg",sub:"講師MTG",aud:"t",en:"Action item: I'll update the slides.",k:"アクション アイテム：アイル アップデイト ザ スライズ",j:"アクション：スライドを更新します。"},
+ {c:"mtg",sub:"講師MTG",aud:"t",en:"Let's wrap up. Any blockers?",k:"レッツ ラップ アップ。エニー ブロッカーズ？",j:"締めましょう。困りごとはありますか？"},
+ {c:"mtg",sub:"受講生アナウンス",aud:"t",en:"Good morning! Today's session starts at ten.",k:"グッ モーニング！トゥデイズ セッション スターツ アット テン",j:"おはよう！本日は10時開始です。"},
+ {c:"mtg",sub:"受講生アナウンス",aud:"t",en:"Reminder: please submit your homework by Friday.",k:"リマインダー：プリーズ サブミット ユア ホームワーク バイ フライデイ",j:"リマインド：宿題は金曜までに提出を。"},
+ {c:"mtg",sub:"受講生アナウンス",aud:"t",en:"We'll take a ten-minute break now.",k:"ウィル テイク ア テンミニット ブレイク ナウ",j:"これから10分休憩します。"},
+ {c:"mtg",sub:"受講生アナウンス",aud:"t",en:"If you have questions, drop them in the chat anytime.",k:"イフ ユー ハヴ クエスチョンズ、ドロップ ゼム イン ザ チャット エニータイム",j:"質問はいつでもチャットへどうぞ。"},
+ {c:"mtg",sub:"受講生アナウンス",aud:"t",en:"Great work today, everyone! See you tomorrow.",k:"グレイト ワーク トゥデイ、エヴリワン！スィー ユー トゥモロー",j:"今日もお疲れさま！また明日。"},
+ // python (受講生向け)
+ {c:"python",sub:"よく使う質問",aud:"l",en:"How do I import this module?",k:"ハウ ドゥ アイ インポート ディス モジュール？",j:"このモジュールはどうやってimportしますか？"},
+ {c:"python",sub:"よく使う質問",aud:"l",en:"What does this function return?",k:"ワット ダズ ディス ファンクション リターン？",j:"この関数は何を返しますか？"},
+ {c:"python",sub:"よく使う質問",aud:"l",en:"Should I use a list or a dictionary here?",k:"シュッ アイ ユーズ ア リスト オア ア ディクショナリー ヒア？",j:"ここはリストと辞書、どちらを使うべきですか？"},
+ {c:"python",sub:"よく使う質問",aud:"l",en:"Where should the indentation go?",k:"ウェア シュッ ジ インデンテーション ゴウ？",j:"インデントはどこに入れますか？"},
+ {c:"python",sub:"エラー・トラブル",aud:"l",en:"I got an IndexError.",k:"アイ ガット アン インデックス エラー",j:"IndexErrorが出ました。"},
+ {c:"python",sub:"エラー・トラブル",aud:"l",en:"My loop doesn't stop.",k:"マイ ループ ダズント ストップ",j:"ループが止まりません。"},
+ {c:"python",sub:"エラー・トラブル",aud:"l",en:"It says the name is not defined.",k:"イット セズ ザ ネーム イズ ノット ディファインド",j:"「name is not defined」と出ます。"},
+ {c:"python",sub:"エラー・トラブル",aud:"l",en:"The indentation seems wrong.",k:"ジ インデンテーション スィームズ ロング",j:"インデントが違うみたいです。"},
+ {c:"python",sub:"進捗の報告",aud:"l",en:"I finished the exercise. It runs without errors.",k:"アイ フィニッシュト ジ エクササイズ。イット ランズ ウィズアウト エラーズ",j:"演習が終わりました。エラーなく動きます。"},
+ {c:"python",sub:"進捗の報告",aud:"l",en:"My code works, but it's a bit slow.",k:"マイ コード ワークス バット イッツ ア ビット スロー",j:"動きますが、少し遅いです。"},
+ {c:"python",sub:"用語（英語で言うと）",aud:"b",en:"variable",k:"ヴェアリアブル",j:"変数"},
+ {c:"python",sub:"用語（英語で言うと）",aud:"b",en:"function",k:"ファンクション",j:"関数"},
+ {c:"python",sub:"用語（英語で言うと）",aud:"b",en:"loop (for / while)",k:"ループ（フォー／ホワイル）",j:"繰り返し"},
+ {c:"python",sub:"用語（英語で言うと）",aud:"b",en:"list / dictionary",k:"リスト／ディクショナリー",j:"リスト／辞書"},
+ {c:"python",sub:"用語（英語で言うと）",aud:"b",en:"exception",k:"イクセプション",j:"例外"},
+ // lpic (受講生向け)
+ {c:"lpic",sub:"よく使う質問",aud:"l",en:"How do I check the file permissions?",k:"ハウ ドゥ アイ チェック ザ ファイル パーミッションズ？",j:"ファイルの権限はどう確認しますか？"},
+ {c:"lpic",sub:"よく使う質問",aud:"l",en:"What does this command do?",k:"ワット ダズ ディス コマンド ドゥ？",j:"このコマンドは何をしますか？"},
+ {c:"lpic",sub:"よく使う質問",aud:"l",en:"How can I see the running processes?",k:"ハウ キャン アイ スィー ザ ランニング プロセスィズ？",j:"動いているプロセスはどう見ますか？"},
+ {c:"lpic",sub:"よく使う質問",aud:"l",en:"Which option should I use?",k:"ウィッチ オプション シュッ アイ ユーズ？",j:"どのオプションを使えばいいですか？"},
+ {c:"lpic",sub:"コマンド・トラブル",aud:"l",en:"I'll check the man page.",k:"アイル チェック ザ マン ペイジ",j:"manページを確認します。"},
+ {c:"lpic",sub:"コマンド・トラブル",aud:"l",en:"The service won't start.",k:"ザ サービス ウォント スタート",j:"サービスが起動しません。"},
+ {c:"lpic",sub:"コマンド・トラブル",aud:"l",en:"Permission denied. What should I do?",k:"パーミッション ディナイド。ワット シュッ アイ ドゥ？",j:"Permission deniedです。どうすれば？"},
+ {c:"lpic",sub:"コマンド・トラブル",aud:"l",en:"I mounted the disk successfully.",k:"アイ マウンティッド ザ ディスク サクセスフリー",j:"ディスクのマウントに成功しました。"},
+ {c:"lpic",sub:"進捗の報告",aud:"l",en:"I finished configuring the network.",k:"アイ フィニッシュト コンフィギュアリング ザ ネットワーク",j:"ネットワーク設定が終わりました。"},
+ {c:"lpic",sub:"進捗の報告",aud:"l",en:"The package installed without errors.",k:"ザ パッケージ インストールド ウィズアウト エラーズ",j:"パッケージはエラーなくインストールできました。"},
+ {c:"lpic",sub:"用語（英語で言うと）",aud:"b",en:"permission",k:"パーミッション",j:"権限"},
+ {c:"lpic",sub:"用語（英語で言うと）",aud:"b",en:"package",k:"パッケージ",j:"パッケージ"},
+ {c:"lpic",sub:"用語（英語で言うと）",aud:"b",en:"process / daemon",k:"プロセス／デーモン",j:"プロセス／常駐サービス"},
+ {c:"lpic",sub:"用語（英語で言うと）",aud:"b",en:"mount",k:"マウント",j:"マウント（接続）"},
+ {c:"lpic",sub:"用語（英語で言うと）",aud:"b",en:"shell / kernel",k:"シェル／カーネル",j:"シェル／カーネル"},
+ // ---- Python 応用 ----
+ {c:"python",sub:"応用｜関数定義",aud:"l",en:"How do I define a function?",k:"ハウ ドゥ アイ ディファイン ア ファンクション？",j:"関数はどう定義しますか？"},
+ {c:"python",sub:"応用｜関数定義",aud:"l",en:"Can a function return more than one value?",k:"キャン ア ファンクション リターン モア ザン ワン ヴァリュー？",j:"関数は複数の値を返せますか？"},
+ {c:"python",sub:"応用｜関数定義",aud:"t",en:"A function lets you reuse code. You define it with 'def'.",k:"ア ファンクション レッツ ユー リユーズ コード。ユー ディファイン イット ウィズ デフ",j:"関数はコードを再利用できます。defで定義します。"},
+ {c:"python",sub:"応用｜関数定義",aud:"t",en:"Arguments are the values you pass in; parameters receive them.",k:"アーギュメンツ アー ザ ヴァリューズ ユー パス イン；パラメーターズ リスィーヴ ゼム",j:"引数は渡す値、パラメータはそれを受け取る名前です。"},
+ {c:"python",sub:"応用｜関数定義",aud:"t",en:"Use 'return' to send a value back to the caller.",k:"ユーズ リターン トゥ センド ア ヴァリュー バック トゥ ザ コーラー",j:"returnで呼び出し元に値を返します。"},
+ {c:"python",sub:"応用｜例外処理",aud:"l",en:"How do I catch an exception?",k:"ハウ ドゥ アイ キャッチ アン イクセプション？",j:"例外はどうやって捕まえますか？"},
+ {c:"python",sub:"応用｜例外処理",aud:"l",en:"What's the difference between except and finally?",k:"ワッツ ザ ディファレンス ビトウィーン エクセプト アンド ファイナリー？",j:"exceptとfinallyの違いは？"},
+ {c:"python",sub:"応用｜例外処理",aud:"t",en:"Wrap risky code in 'try', and handle problems in 'except'.",k:"ラップ リスキー コード イン トライ、アンド ハンドル プロブレムズ イン エクセプト",j:"危ない処理をtryで囲み、exceptで対処します。"},
+ {c:"python",sub:"応用｜例外処理",aud:"t",en:"The 'finally' block always runs, error or not.",k:"ザ ファイナリー ブロック オールウェイズ ランズ、エラー オア ノット",j:"finallyはエラーの有無に関わらず必ず実行されます。"},
+ {c:"python",sub:"応用｜例外処理",aud:"t",en:"Catch specific exceptions, not just a bare 'except'.",k:"キャッチ スペシフィック イクセプションズ、ノット ジャスト ア ベア エクセプト",j:"具体的な例外を捕まえ、何でもexceptは避けます。"},
+ {c:"python",sub:"応用｜pandas",aud:"l",en:"How do I read a CSV file with pandas?",k:"ハウ ドゥ アイ リード ア シーエスヴイ ファイル ウィズ パンダス？",j:"pandasでCSVはどう読みますか？"},
+ {c:"python",sub:"応用｜pandas",aud:"l",en:"How can I filter rows by a condition?",k:"ハウ キャン アイ フィルター ロウズ バイ ア コンディション？",j:"条件で行を絞るには？"},
+ {c:"python",sub:"応用｜pandas",aud:"t",en:"A DataFrame is like a table with rows and columns.",k:"ア データフレイム イズ ライク ア テイブル ウィズ ロウズ アンド カラムズ",j:"DataFrameは行と列のある表のようなものです。"},
+ {c:"python",sub:"応用｜pandas",aud:"t",en:"Use read_csv to load data, and head() to peek at it.",k:"ユーズ リード シーエスヴイ トゥ ロード データ、アンド ヘッド トゥ ピーク アット イット",j:"read_csvで読み込み、head()で先頭を確認します。"},
+ {c:"python",sub:"応用｜pandas",aud:"t",en:"Filter rows by passing a condition in the brackets.",k:"フィルター ロウズ バイ パッシング ア コンディション イン ザ ブラケッツ",j:"角かっこに条件を渡して行を絞ります。"},
+ // ---- LPIC 科目別 ----
+ {c:"lpic",sub:"科目｜権限",aud:"l",en:"How do I change a file's permissions?",k:"ハウ ドゥ アイ チェンジ ア ファイルズ パーミッションズ？",j:"ファイルの権限はどう変えますか？"},
+ {c:"lpic",sub:"科目｜権限",aud:"l",en:"What do r, w, and x mean?",k:"ワット ドゥ アール、ダブリュー、アンド エックス ミーン？",j:"r・w・xは何を意味しますか？"},
+ {c:"lpic",sub:"科目｜権限",aud:"t",en:"Permissions decide who can read, write, or execute a file.",k:"パーミッションズ ディサイド フー キャン リード、ライト、オア エグゼキュート ア ファイル",j:"権限は誰が読み・書き・実行できるかを決めます。"},
+ {c:"lpic",sub:"科目｜権限",aud:"t",en:"chmod changes permissions; chown changes the owner.",k:"チモッド チェンジズ パーミッションズ；チャウン チェンジズ ジ オーナー",j:"chmodは権限、chownは所有者を変えます。"},
+ {c:"lpic",sub:"科目｜権限",aud:"t",en:"The three groups are owner, group, and others.",k:"ザ スリー グループス アー オーナー、グループ、アンド アザーズ",j:"区分は所有者・グループ・その他の3つです。"},
+ {c:"lpic",sub:"科目｜プロセス",aud:"l",en:"How do I list the running processes?",k:"ハウ ドゥ アイ リスト ザ ランニング プロセスィズ？",j:"動いているプロセスはどう一覧しますか？"},
+ {c:"lpic",sub:"科目｜プロセス",aud:"l",en:"How can I stop this process?",k:"ハウ キャン アイ ストップ ディス プロセス？",j:"このプロセスはどう止めますか？"},
+ {c:"lpic",sub:"科目｜プロセス",aud:"t",en:"Use ps or top to see what's running.",k:"ユーズ ピーエス オア トップ トゥ スィー ワッツ ランニング",j:"psやtopで実行中を確認します。"},
+ {c:"lpic",sub:"科目｜プロセス",aud:"t",en:"kill sends a signal to stop a process by its PID.",k:"キル センズ ア シグナル トゥ ストップ ア プロセス バイ イッツ ピーアイディー",j:"killはPID指定でプロセスに停止信号を送ります。"},
+ {c:"lpic",sub:"科目｜プロセス",aud:"t",en:"A daemon is a process that runs in the background.",k:"ア デーモン イズ ア プロセス ザット ランズ イン ザ バックグラウンド",j:"デーモンは背後で動き続けるプロセスです。"},
+ {c:"lpic",sub:"科目｜ネットワーク",aud:"l",en:"How do I check my IP address?",k:"ハウ ドゥ アイ チェック マイ アイピー アドレス？",j:"IPアドレスはどう確認しますか？"},
+ {c:"lpic",sub:"科目｜ネットワーク",aud:"l",en:"How can I test if a host is reachable?",k:"ハウ キャン アイ テスト イフ ア ホスト イズ リーチャブル？",j:"相手に到達できるかどう確認しますか？"},
+ {c:"lpic",sub:"科目｜ネットワーク",aud:"t",en:"Use 'ip addr' to see your network interfaces.",k:"ユーズ アイピー アダー トゥ スィー ユア ネットワーク インターフェイスィズ",j:"ip addrでネットワークインターフェースを確認します。"},
+ {c:"lpic",sub:"科目｜ネットワーク",aud:"t",en:"ping checks if a host responds; ss shows open ports.",k:"ピン チェックス イフ ア ホスト リスポンズ；エスエス ショウズ オープン ポーツ",j:"pingは応答確認、ssは開放ポートの確認です。"},
+ {c:"lpic",sub:"科目｜ネットワーク",aud:"t",en:"DNS turns a name into an IP address.",k:"ディーエヌエス ターンズ ア ネイム イントゥ アン アイピー アドレス",j:"DNSは名前をIPアドレスに変換します。"},
+ {c:"lpic",sub:"科目｜シェルスクリプト",aud:"l",en:"How do I make a script executable?",k:"ハウ ドゥ アイ メイク ア スクリプト エグゼキュータブル？",j:"スクリプトを実行可能にするには？"},
+ {c:"lpic",sub:"科目｜シェルスクリプト",aud:"l",en:"How do I use a variable in bash?",k:"ハウ ドゥ アイ ユーズ ア ヴェアリアブル イン バッシュ？",j:"bashで変数はどう使いますか？"},
+ {c:"lpic",sub:"科目｜シェルスクリプト",aud:"t",en:"Start a script with a shebang, like #!/bin/bash.",k:"スタート ア スクリプト ウィズ ア シバン、ライク ハッシュ バン ビン バッシュ",j:"スクリプトは #!/bin/bash のシバンで始めます。"},
+ {c:"lpic",sub:"科目｜シェルスクリプト",aud:"t",en:"Make it executable with chmod +x, then run it.",k:"メイク イット エグゼキュータブル ウィズ チモッド プラス エックス、ゼン ラン イット",j:"chmod +xで実行可能にして実行します。"},
+ {c:"lpic",sub:"科目｜シェルスクリプト",aud:"t",en:"Use a for loop to repeat commands.",k:"ユーズ ア フォー ループ トゥ リピート コマンズ",j:"forループでコマンドを繰り返します。"},
+ // ---- Python 応用 追加 ----
+ {c:"python",sub:"応用｜クラス/OOP",aud:"l",en:"How do I define a class?",k:"ハウ ドゥ アイ ディファイン ア クラス？",j:"クラスはどう定義しますか？"},
+ {c:"python",sub:"応用｜クラス/OOP",aud:"l",en:"What is 'self' in a method?",k:"ワット イズ セルフ イン ア メソッド？",j:"メソッドのselfって何ですか？"},
+ {c:"python",sub:"応用｜クラス/OOP",aud:"t",en:"A class is a blueprint; an object is an instance made from it.",k:"ア クラス イズ ア ブループリント；アン オブジェクト イズ アン インスタンス メイド フロム イット",j:"クラスは設計図、オブジェクトはそこから作る実体です。"},
+ {c:"python",sub:"応用｜クラス/OOP",aud:"t",en:"'self' refers to the instance the method belongs to.",k:"セルフ リファーズ トゥ ジ インスタンス ザ メソッド ビロングズ トゥ",j:"selfはそのメソッドが属するインスタンスを指します。"},
+ {c:"python",sub:"応用｜クラス/OOP",aud:"t",en:"Use __init__ to set up an object when it's created.",k:"ユーズ イニット トゥ セット アップ アン オブジェクト ウェン イッツ クリエイティッド",j:"__init__は生成時の初期化に使います。"},
+ {c:"python",sub:"応用｜仮想環境",aud:"l",en:"How do I create a virtual environment?",k:"ハウ ドゥ アイ クリエイト ア ヴァーチャル インヴァイロンメント？",j:"仮想環境はどう作りますか？"},
+ {c:"python",sub:"応用｜仮想環境",aud:"l",en:"Do I need to activate it every time?",k:"ドゥ アイ ニード トゥ アクティベイト イット エヴリ タイム？",j:"毎回、有効化が必要ですか？"},
+ {c:"python",sub:"応用｜仮想環境",aud:"t",en:"A virtual environment keeps each project's packages separate.",k:"ア ヴァーチャル インヴァイロンメント キープス イーチ プロジェクツ パッケージズ セパレート",j:"仮想環境はプロジェクトごとにパッケージを分けて管理します。"},
+ {c:"python",sub:"応用｜仮想環境",aud:"t",en:"Create it with 'python -m venv', then activate it.",k:"クリエイト イット ウィズ パイソン エム ヴェン、ゼン アクティベイト イット",j:"python -m venv で作り、有効化して使います。"},
+ {c:"python",sub:"応用｜pip",aud:"l",en:"How do I install a package with pip?",k:"ハウ ドゥ アイ インストール ア パッケージ ウィズ ピップ？",j:"pipでパッケージはどう入れますか？"},
+ {c:"python",sub:"応用｜pip",aud:"l",en:"How can I see what's installed?",k:"ハウ キャン アイ スィー ワッツ インストールド？",j:"入っているものはどう確認しますか？"},
+ {c:"python",sub:"応用｜pip",aud:"t",en:"pip installs packages; freeze them into requirements.txt to share.",k:"ピップ インストールズ パッケージズ；フリーズ ゼム イントゥ リクワイアメンツ テキスト トゥ シェア",j:"pipで導入し、requirements.txtに固定して共有します。"},
+ {c:"python",sub:"応用｜pip",aud:"t",en:"Always install inside an active virtual environment.",k:"オールウェイズ インストール インサイド アン アクティブ ヴァーチャル インヴァイロンメント",j:"必ず有効化した仮想環境の中で入れましょう。"},
+ {c:"python",sub:"応用｜テスト",aud:"l",en:"How do I write a test?",k:"ハウ ドゥ アイ ライト ア テスト？",j:"テストはどう書きますか？"},
+ {c:"python",sub:"応用｜テスト",aud:"l",en:"Why is my test failing?",k:"ホワイ イズ マイ テスト フェイリング？",j:"なぜテストが失敗するのでしょう？"},
+ {c:"python",sub:"応用｜テスト",aud:"t",en:"A test checks that your code does what you expect.",k:"ア テスト チェックス ザット ユア コード ダズ ワット ユー イクスペクト",j:"テストはコードが期待どおり動くか確認します。"},
+ {c:"python",sub:"応用｜テスト",aud:"t",en:"With pytest, name files test_*.py and use 'assert'.",k:"ウィズ パイテスト、ネイム ファイルズ テスト ドット パイ アンド ユーズ アサート",j:"pytestでは test_*.py という名前にし、assertを使います。"},
+ {c:"python",sub:"応用｜テスト",aud:"t",en:"A failing test is useful—it tells you exactly what's wrong.",k:"ア フェイリング テスト イズ ユースフル—イット テルズ ユー イグザクトリー ワッツ ロング",j:"失敗テストは有益。どこが問題か正確に教えてくれます。"},
+ // ---- LPIC 科目別 追加 ----
+ {c:"lpic",sub:"科目｜systemd",aud:"l",en:"How do I start a service?",k:"ハウ ドゥ アイ スタート ア サービス？",j:"サービスはどう起動しますか？"},
+ {c:"lpic",sub:"科目｜systemd",aud:"l",en:"How can I make it start at boot?",k:"ハウ キャン アイ メイク イット スタート アット ブート？",j:"起動時に自動で始めるには？"},
+ {c:"lpic",sub:"科目｜systemd",aud:"t",en:"systemctl controls services: start, stop, enable, status.",k:"システムシーティーエル コントロールズ サービシズ：スタート、ストップ、イネイブル、ステイタス",j:"systemctlでサービスを start/stop/enable/status 操作します。"},
+ {c:"lpic",sub:"科目｜systemd",aud:"t",en:"'enable' starts it at boot; 'start' starts it now.",k:"イネイブル スターツ イット アット ブート；スタート スターツ イット ナウ",j:"enableは起動時に自動、startは今すぐ起動です。"},
+ {c:"lpic",sub:"科目｜cron",aud:"l",en:"How do I schedule a job?",k:"ハウ ドゥ アイ スケジュール ア ジョブ？",j:"定期実行はどう設定しますか？"},
+ {c:"lpic",sub:"科目｜cron",aud:"l",en:"What do the five fields in crontab mean?",k:"ワット ドゥ ザ ファイヴ フィールズ イン クロンタブ ミーン？",j:"crontabの5項目は何を表しますか？"},
+ {c:"lpic",sub:"科目｜cron",aud:"t",en:"cron runs commands on a schedule; edit it with 'crontab -e'.",k:"クロン ランズ コマンズ オン ア スケジュール；エディット イット ウィズ クロンタブ イー",j:"cronは予定実行。crontab -e で編集します。"},
+ {c:"lpic",sub:"科目｜cron",aud:"t",en:"The five fields are minute, hour, day, month, and weekday.",k:"ザ ファイヴ フィールズ アー ミニット、アワー、デイ、マンス、アンド ウィークデイ",j:"5項目は分・時・日・月・曜日です。"},
+ {c:"lpic",sub:"科目｜ログ/journalctl",aud:"l",en:"Where are the system logs?",k:"ウェア アー ザ システム ログズ？",j:"システムログはどこにありますか？"},
+ {c:"lpic",sub:"科目｜ログ/journalctl",aud:"l",en:"How do I see the latest logs?",k:"ハウ ドゥ アイ スィー ザ レイテスト ログズ？",j:"最新のログはどう見ますか？"},
+ {c:"lpic",sub:"科目｜ログ/journalctl",aud:"t",en:"Use journalctl to read systemd logs; add -u for one service.",k:"ユーズ ジャーナルシーティーエル トゥ リード システムディー ログズ；アド ユー フォー ワン サービス",j:"journalctlでログ閲覧、-uでサービスを指定します。"},
+ {c:"lpic",sub:"科目｜ログ/journalctl",aud:"t",en:"journalctl -f follows new logs in real time.",k:"ジャーナルシーティーエル エフ フォローズ ニュー ログズ イン リアル タイム",j:"journalctl -f は新着ログをリアルタイムで追います。"},
+ {c:"lpic",sub:"科目｜パーティション",aud:"l",en:"How do I check the disk partitions?",k:"ハウ ドゥ アイ チェック ザ ディスク パーティションズ？",j:"ディスクのパーティションはどう確認しますか？"},
+ {c:"lpic",sub:"科目｜パーティション",aud:"l",en:"How much free space is left?",k:"ハウ マッチ フリー スペイス イズ レフト？",j:"空き容量はどれくらいですか？"},
+ {c:"lpic",sub:"科目｜パーティション",aud:"t",en:"Use lsblk to list disks and partitions, df for free space.",k:"ユーズ エルエスブロック トゥ リスト ディスクス アンド パーティションズ、ディーエフ フォー フリー スペイス",j:"lsblkで一覧、dfで空き容量を見ます。"},
+ {c:"lpic",sub:"科目｜パーティション",aud:"t",en:"A partition must be formatted and mounted before use.",k:"ア パーティション マスト ビー フォーマッティッド アンド マウンティッド ビフォア ユーズ",j:"パーティションは使う前にフォーマットしてマウントします。"},
+ // ---- トラブル時 ----
+ {c:"trouble",sub:"接続・音声",aud:"b",en:"Sorry, my connection dropped. Could you repeat that?",k:"ソーリー、マイ コネクション ドロップト。クッジュー リピート ザット？",j:"すみません、接続が切れました。もう一度いいですか？"},
+ {c:"trouble",sub:"接続・音声",aud:"b",en:"Your voice is breaking up a little.",k:"ユア ヴォイス イズ ブレイキング アップ ア リトル",j:"声が少し途切れています。"},
+ {c:"trouble",sub:"接続・音声",aud:"b",en:"Can everyone reconnect? We'll wait for you.",k:"キャン エヴリワン リコネクト？ ウィル ウェイト フォー ユー",j:"みんな繋ぎ直せますか？待ちますね。"},
+ {c:"trouble",sub:"画面・環境",aud:"l",en:"My screen froze. Give me a second.",k:"マイ スクリーン フローズ。ギヴ ミー ア セカンド",j:"画面が固まりました。少し待ってください。"},
+ {c:"trouble",sub:"画面・環境",aud:"l",en:"I can't access the environment. It says 'connection refused'.",k:"アイ キャント アクセス ジ インヴァイロンメント。イット セズ コネクション リフューズド",j:"環境に入れません。connection refusedと出ます。"},
+ {c:"trouble",sub:"画面・環境",aud:"t",en:"Try refreshing the page or rejoining the room.",k:"トライ リフレッシング ザ ペイジ オア リジョイニング ザ ルーム",j:"ページ更新か、入り直しを試してください。"},
+ {c:"trouble",sub:"落ち着かせる",aud:"t",en:"Let's pause for a moment while we fix the issue.",k:"レッツ ポーズ フォー ア モーメント ワイル ウィー フィックス ジ イシュー",j:"問題を直す間、少し止めましょう。"},
+ {c:"trouble",sub:"落ち着かせる",aud:"t",en:"No worries—technical hiccups happen. Let's troubleshoot together.",k:"ノー ワリーズ—テクニカル ヒカップス ハプン。レッツ トラブルシュート トゥゲザー",j:"大丈夫、不具合はよくあること。一緒に直しましょう。"},
+ // ---- つまずき先回り（講師向け） ----
+ {c:"preempt",aud:"t",en:"This part trips a lot of people up, so let's go slowly.",k:"ディス パート トリップス ア ロット オブ ピープル アップ、ソー レッツ ゴー スローリー",j:"ここは多くの人がつまずくので、ゆっくりいきます。"},
+ {c:"preempt",aud:"t",en:"If you see an error here, that's expected—don't worry.",k:"イフ ユー スィー アン エラー ヒア、ザッツ イクスペクティッド—ドント ワリー",j:"ここでエラーが出ても想定内です。心配しないで。"},
+ {c:"preempt",aud:"t",en:"A common mistake is forgetting the colon—watch for that.",k:"ア コモン ミステイク イズ フォゲッティング ザ コロン—ウォッチ フォー ザット",j:"よくあるミスはコロン忘れ。気をつけてね。"},
+ {c:"preempt",aud:"t",en:"It's totally normal to get stuck here. Take your time.",k:"イッツ トータリー ノーマル トゥ ゲット スタック ヒア。テイク ユア タイム",j:"ここで詰まるのはごく普通。焦らずにいきましょう。"},
+ {c:"preempt",aud:"t",en:"Don't memorize this—just know where to look it up.",k:"ドント メモライズ ディス—ジャスト ノウ ウェア トゥ ルック イット アップ",j:"暗記しなくてOK。調べ方を覚えましょう。"},
+ {c:"preempt",aud:"t",en:"If this feels confusing, that means you're learning.",k:"イフ ディス フィールズ コンフュージング、ザット ミーンズ ユア ラーニング",j:"難しく感じたら、それは学んでいる証拠です。"},
+ {c:"preempt",aud:"t",en:"Many people mix these two up, so let's compare them.",k:"メニー ピープル ミックス ジーズ トゥー アップ、ソー レッツ コンペア ゼム",j:"この2つは混同しがち。並べて比べましょう。"},
+ // ---- 進捗・日報 ----
+ {c:"progress",sub:"進捗報告（受講生）",aud:"l",en:"Here's my progress for today.",k:"ヒアズ マイ プログレス フォー トゥデイ",j:"本日の進捗です。"},
+ {c:"progress",sub:"進捗報告（受講生）",aud:"l",en:"I completed the basics and started the exercises.",k:"アイ コンプリーティッド ザ ベイシックス アンド スターティッド ジ エクササイズィズ",j:"基礎を終えて、演習に入りました。"},
+ {c:"progress",sub:"進捗報告（受講生）",aud:"l",en:"I'm a little behind, but I'll catch up by tomorrow.",k:"アイム ア リトル ビハインド、バット アイル キャッチ アップ バイ トゥモロー",j:"少し遅れていますが、明日には追いつきます。"},
+ {c:"progress",sub:"進捗報告（受講生）",aud:"l",en:"What I struggled with today was the error handling.",k:"ワット アイ ストラグルド ウィズ トゥデイ ワズ ジ エラー ハンドリング",j:"今日つまずいたのは例外処理の部分です。"},
+ {c:"progress",sub:"日報（講師）",aud:"t",en:"Today's session covered functions. Attendance was full.",k:"トゥデイズ セッション カバード ファンクションズ。アテンダンス ワズ フル",j:"本日は関数を実施。出席は全員でした。"},
+ {c:"progress",sub:"日報（講師）",aud:"t",en:"Overall understanding looks good; a few need follow-up.",k:"オーヴァオール アンダースタンディング ルックス グッド；ア フュー ニード フォローアップ",j:"全体の理解は良好、数名はフォローが必要です。"},
+ {c:"progress",sub:"日報（講師）",aud:"t",en:"Daily report: progress, blockers, and next steps.",k:"デイリー リポート：プログレス、ブロッカーズ、アンド ネクスト ステップス",j:"日報：進捗・課題・次の一手。"},
+ {c:"progress",sub:"日報（講師）",aud:"t",en:"No major issues today. Morale is high.",k:"ノー メイジャー イシューズ トゥデイ。モラール イズ ハイ",j:"大きな問題なし。雰囲気は良好です。"},
+ // ---- 研修ビジネス ----
+ {c:"biz",sub:"カリキュラム設計（レベル・業種別）",aud:"t",en:"Let's tailor the curriculum to their level and industry.",k:"レッツ テイラー ザ カリキュラム トゥ ゼア レベル アンド インダストリー",j:"レベルと業種に合わせて設計しましょう。"},
+ {c:"biz",sub:"カリキュラム設計（レベル・業種別）",aud:"t",en:"For beginners, we'll focus on fundamentals and practice.",k:"フォー ビギナーズ、ウィル フォーカス オン ファンダメンタルズ アンド プラクティス",j:"初心者向けは基礎と演習を厚めに。"},
+ {c:"biz",sub:"カリキュラム設計（レベル・業種別）",aud:"t",en:"Since they're in finance, let's use finance examples.",k:"シンス ゼイア イン ファイナンス、レッツ ユーズ ファイナンス エグザンプルズ",j:"金融業界なので、金融の例を使いましょう。"},
+ {c:"biz",sub:"カリキュラム設計（レベル・業種別）",aud:"t",en:"What outcomes should learners achieve by the end?",k:"ワット アウトカムズ シュッ ラーナーズ アチーヴ バイ ジ エンド？",j:"修了時にどんな成果を目指しますか？"},
+ {c:"biz",sub:"ヒアリング・課題整理",aud:"t",en:"What business outcome do you expect from this training?",k:"ワット ビジネス アウトカム ドゥ ユー イクスペクト フロム ディス トレーニング？",j:"この研修に期待する成果は？（経営層）"},
+ {c:"biz",sub:"ヒアリング・課題整理",aud:"t",en:"What do your team members struggle with most?",k:"ワット ドゥ ユア チーム メンバーズ ストラグル ウィズ モースト？",j:"現場で一番困っていることは？（現場）"},
+ {c:"biz",sub:"ヒアリング・課題整理",aud:"t",en:"Let me summarize the issues we've identified.",k:"レッ ミー サマライズ ジ イシューズ ウィヴ アイデンティファイド",j:"把握した課題を整理します。"},
+ {c:"biz",sub:"ヒアリング・課題整理",aud:"t",en:"So the top priority is onboarding speed, correct?",k:"ソー ザ トップ プライオリティ イズ オンボーディング スピード、コレクト？",j:"最優先は立ち上がりの速さ、ということですね？"},
+ {c:"biz",sub:"フォローアップ・継続支援",aud:"t",en:"Let's set up a follow-up session in two weeks.",k:"レッツ セット アップ ア フォローアップ セッション イン トゥー ウィークス",j:"2週間後にフォローアップを設定しましょう。"},
+ {c:"biz",sub:"フォローアップ・継続支援",aud:"t",en:"Feel free to reach out anytime after the training.",k:"フィール フリー トゥ リーチ アウト エニータイム アフター ザ トレーニング",j:"研修後もいつでも連絡してください。"},
+ {c:"biz",sub:"フォローアップ・継続支援",aud:"t",en:"We'll track how the skills are used on the job.",k:"ウィル トラック ハウ ザ スキルズ アー ユーズド オン ザ ジョブ",j:"学んだスキルが現場でどう使われるか追います。"},
+ {c:"biz",sub:"成功させるMTG",aud:"t",en:"Let's align on the goal before we start.",k:"レッツ アライン オン ザ ゴール ビフォア ウィー スタート",j:"始める前にゴールをそろえましょう。"},
+ {c:"biz",sub:"成功させるMTG",aud:"t",en:"What does success look like for this project?",k:"ワット ダズ サクセス ルック ライク フォー ディス プロジェクト？",j:"このプロジェクトの成功とは？"},
+ {c:"biz",sub:"成功させるMTG",aud:"t",en:"Let's end with clear action items and owners.",k:"レッツ エンド ウィズ クリア アクション アイテムズ アンド オーナーズ",j:"担当つきのアクションで締めましょう。"},
+ // ---- コーチング（講師向け） ----
+ {c:"coach",sub:"前向きに褒めて導く",aud:"t",en:"You're on the right track—keep going.",k:"ユア オン ザ ライト トラック—キープ ゴーイング",j:"いい方向です、その調子。"},
+ {c:"coach",sub:"前向きに褒めて導く",aud:"t",en:"Nice approach! Let's build on that.",k:"ナイス アプローチ！レッツ ビルド オン ザット",j:"いいやり方！そこから伸ばそう。"},
+ {c:"coach",sub:"問いかけでアドバイス（否定しない）",aud:"t",en:"What do you think would happen if you tried this?",k:"ワット ドゥ ユー スィンク ウッ ハプン イフ ユー トライド ディス？",j:"これを試すと、どうなると思う？"},
+ {c:"coach",sub:"問いかけでアドバイス（否定しない）",aud:"t",en:"What's another way we could approach this?",k:"ワッツ アナザー ウェイ ウィー クッ アプローチ ディス？",j:"別のやり方もあるかな？"},
+ {c:"coach",sub:"問いかけでアドバイス（否定しない）",aud:"t",en:"Instead of 'that's wrong,' ask 'what made you choose this?'",k:"インステッド オブ ザッツ ロング、アスク ワット メイド ユー チューズ ディス？",j:"「違う」ではなく「なぜこれを選んだ？」と聞く。"},
+ {c:"coach",sub:"Why / What / How で理解確認",aud:"t",en:"Why do we do it this way?",k:"ホワイ ドゥ ウィー ドゥ イット ディス ウェイ？",j:"なぜ、こうするの？（Why）"},
+ {c:"coach",sub:"Why / What / How で理解確認",aud:"t",en:"What does this part do?",k:"ワット ダズ ディス パート ドゥ？",j:"これは何をしている？（What）"},
+ {c:"coach",sub:"Why / What / How で理解確認",aud:"t",en:"How would you explain this to a teammate?",k:"ハウ ウッ ユー エクスプレイン ディス トゥ ア チームメイト？",j:"仲間にどう説明する？（How）"},
+ {c:"coach",sub:"ヒントの出し方",aud:"t",en:"Here's a hint: focus on this line first.",k:"ヒアズ ア ヒント：フォーカス オン ディス ライン ファースト",j:"ヒント：まずこの行に注目。"},
+ {c:"coach",sub:"ヒントの出し方",aud:"t",en:"Check the error message—it's telling you something.",k:"チェック ジ エラー メッセージ—イッツ テリング ユー サムシング",j:"エラーメッセージを見て。何か教えてくれてるよ。"},
+ {c:"coach",sub:"答えが惜しいとき",aud:"t",en:"So close! You've got the idea—just refine this part.",k:"ソー クロース！ユーヴ ガット ジ アイディア—ジャスト リファイン ディス パート",j:"惜しい！考え方は合ってる、ここだけ調整。"},
+ {c:"coach",sub:"答えが惜しいとき",aud:"t",en:"Almost there. What's the one thing missing?",k:"オールモスト ゼア。ワッツ ザ ワン スィング ミッシング？",j:"あと一歩。足りないのは何だろう？"},
+ {c:"coach",sub:"答えが惜しいとき",aud:"t",en:"Right direction, small detail off—can you spot it?",k:"ライト ディレクション、スモール ディテイル オフ—キャン ユー スポット イット？",j:"方向は正解、細部が惜しい。見つけられる？"},
+ // ---- 学習ヒント（文系/理系・受講生向け） ----
+ {c:"hint",sub:"文系の人へのヒント",aud:"l",en:"Think of a variable as a labeled box for storing things.",k:"スィンク オブ ア ヴェアリアブル アズ ア レイベルド ボックス フォー ストーリング スィングス",j:"変数は“ラベル付きの箱”とイメージ。"},
+ {c:"hint",sub:"文系の人へのヒント",aud:"l",en:"Read code like a recipe: step by step, top to bottom.",k:"リード コード ライク ア レシピ：ステップ バイ ステップ、トップ トゥ ボトム",j:"コードはレシピのように上から順に。"},
+ {c:"hint",sub:"文系の人へのヒント",aud:"l",en:"You don't need math—just clear, logical steps.",k:"ユー ドント ニード マス—ジャスト クリア、ロジカル ステップス",j:"数学は不要。大事なのは筋道です。"},
+ {c:"hint",sub:"文系の人へのヒント",aud:"l",en:"Explain it in your own words first, then code it.",k:"エクスプレイン イット イン ユア オウン ワーズ ファースト、ゼン コード イット",j:"まず自分の言葉で、それからコードに。"},
+ {c:"hint",sub:"理系の人へのヒント",aud:"l",en:"Think of it as a function: input goes in, output comes out.",k:"スィンク オブ イット アズ ア ファンクション：インプット ゴウズ イン、アウトプット カムズ アウト",j:"関数＝入力→出力でとらえる。"},
+ {c:"hint",sub:"理系の人へのヒント",aud:"l",en:"Look for the pattern, then generalize it.",k:"ルック フォー ザ パターン、ゼン ジェネラライズ イット",j:"パターンを見つけて一般化。"},
+ {c:"hint",sub:"理系の人へのヒント",aud:"l",en:"Trace the data flow step by step.",k:"トレイス ザ データ フロー ステップ バイ ステップ",j:"データの流れを一段ずつ追う。"},
+ {c:"hint",sub:"理系の人へのヒント",aud:"l",en:"Test your assumption with a small example.",k:"テスト ユア アサンプション ウィズ ア スモール エグザンプル",j:"仮説は小さな例で検証する。"},
+ // ---- コーチング：自覚を促し行動させる問いかけ ----
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"What do you notice about your result?",k:"ワット ドゥ ユー ノーティス アバウト ユア リザルト？",j:"自分の結果、何に気づいた？"},
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"What's working, and what would you change?",k:"ワッツ ワーキング、アンド ワット ウッ ユー チェンジ？",j:"うまくいってる点と、変えたい点は？"},
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"What's one small step you can take right now?",k:"ワッツ ワン スモール ステップ ユー キャン テイク ライト ナウ？",j:"今すぐできる、小さな一歩は？"},
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"How will you approach it differently next time?",k:"ハウ ウィル ユー アプローチ イット ディファレントリー ネクスト タイム？",j:"次は、やり方をどう変える？"},
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"What did this mistake teach you?",k:"ワット ディッ ディス ミステイク ティーチ ユー？",j:"この間違いから、何を学んだ？"},
+ {c:"coach",sub:"自覚を促し行動させる問いかけ",aud:"t",en:"So, what will you do first?",k:"ソー、ワット ウィル ユー ドゥ ファースト？",j:"では、まず何からやってみる？"},
+ // ---- 全体アナウンス（集団レッスン） ----
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"Everyone, may I have your attention, please?",k:"エヴリワン、メイ アイ ハヴ ユア アテンション、プリーズ？",j:"みなさん、注目してもらえますか？"},
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"Let's all pause and look at the screen together.",k:"レッツ オール ポーズ アンド ルック アット ザ スクリーン トゥゲザー",j:"いったん全員止めて、画面を一緒に見ましょう。"},
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"When you're done, please give a thumbs-up.",k:"ウェン ユア ダン、プリーズ ギヴ ア サムズアップ",j:"終わったら、サムズアップで教えてね。"},
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"Can I get a quick show of hands?",k:"キャン アイ ゲット ア クウィック ショウ オブ ハンズ？",j:"ちょっと挙手してもらえますか？"},
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"Let's regroup in five minutes.",k:"レッツ リグループ イン ファイヴ ミニッツ",j:"5分後に、また集まりましょう。"},
+ {c:"mtg",sub:"全体アナウンス（集団レッスン）",aud:"t",en:"Quick announcement before we continue.",k:"クウィック アナウンスメント ビフォア ウィー コンティニュー",j:"続ける前に、ひとつ連絡です。"},
+
+ // ====== ⑱ 口頭試問（ORAL）※心理的安全 ======
+ {c:"oral",aud:"t",en:"Let's do a quick oral check—there's no pass or fail here.",k:"レッツ ドゥ ア クウィック オーラル チェック—ゼアズ ノー パス オア フェイル ヒア",j:"軽く口頭で確認しましょう。合否はありません。"},
+ {c:"oral",aud:"t",en:"Take your time. There's no rush at all.",k:"テイク ユア タイム。ゼアズ ノー ラッシュ アット オール",j:"ゆっくりで大丈夫。急がなくていいですよ。"},
+ {c:"oral",aud:"t",en:"Can you explain, in your own words, what this does?",k:"キャン ユー エクスプレイン、イン ユア オウン ワーズ、ワット ディス ダズ？",j:"自分の言葉で、これが何をするか説明できますか？"},
+ {c:"oral",aud:"t",en:"It's okay to say 'I'm not sure'—that's useful too.",k:"イッツ オウケイ トゥ セイ アイム ノット シュア—ザッツ ユースフル トゥー",j:"「わかりません」もOK。それも大事な情報です。"},
+ {c:"oral",aud:"t",en:"Just talk me through what you do know.",k:"ジャスト トーク ミー スルー ワット ユー ドゥ ノウ",j:"わかるところだけ、話してみてください。"},
+ {c:"oral",aud:"t",en:"Nice explanation! Can you give me an example?",k:"ナイス エクスプラネイション！キャン ユー ギヴ ミー アン エグザンプル？",j:"いい説明！例をひとつ挙げられますか？"},
+ {c:"oral",aud:"t",en:"Why do you think it works this way?",k:"ホワイ ドゥ ユー スィンク イット ワークス ディス ウェイ？",j:"なぜ、こう動くと思いますか？"},
+ {c:"oral",aud:"t",en:"There are no trick questions—just share your thinking.",k:"ゼア アー ノー トリック クエスチョンズ—ジャスト シェア ユア スィンキング",j:"ひっかけはありません。考えを聞かせてください。"},
+ {c:"oral",aud:"l",en:"Could I take a moment to think?",k:"クッ アイ テイク ア モーメント トゥ スィンク？",j:"少し考える時間をもらえますか？"},
+ {c:"oral",aud:"l",en:"I'm not fully sure, but here's my guess.",k:"アイム ノット フリー シュア、バット ヒアズ マイ ゲス",j:"完全には自信がないですが、こうかなと思います。"},
+
+ // ====== ⑲ 筆記試験（WRITTEN） ======
+ {c:"written",aud:"t",en:"The written test starts now. You have thirty minutes.",k:"ザ リトゥン テスト スターツ ナウ。ユー ハヴ サーティ ミニッツ",j:"筆記試験を始めます。時間は30分です。"},
+ {c:"written",aud:"t",en:"Read each question carefully before you answer.",k:"リード イーチ クエスチョン ケアフリー ビフォア ユー アンサー",j:"各問、答える前によく読んでください。"},
+ {c:"written",aud:"t",en:"If you're unsure, write your best guess—partial credit counts.",k:"イフ ユア アンシュア、ライト ユア ベスト ゲス—パーシャル クレジット カウンツ",j:"迷ったら最善の答えを。部分点もあります。"},
+ {c:"written",aud:"t",en:"There's no penalty for wrong answers, so try everything.",k:"ゼアズ ノー ペナルティ フォー ロング アンサーズ、ソー トライ エヴリスィング",j:"誤答の減点はありません。全部チャレンジを。"},
+ {c:"written",aud:"t",en:"When you finish, please review your answers once.",k:"ウェン ユー フィニッシュ、プリーズ レヴュー ユア アンサーズ ワンス",j:"終わったら、一度見直してください。"},
+ {c:"written",aud:"t",en:"Please raise your hand if anything is unclear.",k:"プリーズ レイズ ユア ハンド イフ エニスィング イズ アンクリア",j:"わからない点があれば挙手してください。"},
+ {c:"written",aud:"t",en:"You have five minutes left.",k:"ユー ハヴ ファイヴ ミニッツ レフト",j:"残り5分です。"},
+ {c:"written",aud:"t",en:"Pencils down, please. Time's up.",k:"ペンシルズ ダウン、プリーズ。タイムズ アップ",j:"筆記をやめてください。時間です。"},
+ {c:"written",aud:"l",en:"May I ask a question about the instructions?",k:"メイ アイ アスク ア クエスチョン アバウト ジ インストラクションズ？",j:"設問の指示について質問してもいいですか？"},
+ {c:"written",aud:"l",en:"I'm done. May I submit?",k:"アイム ダン。メイ アイ サブミット？",j:"終わりました。提出してもいいですか？"},
+
+ // ====== ⑳ 理解度クイズ（QUIZ）※心理的安全 ======
+ {c:"quiz",aud:"t",en:"Quick comprehension check—just for us, not for grades.",k:"クウィック コンプリヘンション チェック—ジャスト フォー アス、ノット フォー グレイズ",j:"軽い理解度チェックです。成績ではありません。"},
+ {c:"quiz",aud:"t",en:"This isn't a test; it shows me where to slow down.",k:"ディス イズント ア テスト；イット ショウズ ミー ウェア トゥ スロー ダウン",j:"テストではなく、どこをゆっくり進めるか見るためです。"},
+ {c:"quiz",aud:"t",en:"If many people miss this, that's on me to re-explain.",k:"イフ メニー ピープル ミス ディス、ザッツ オン ミー トゥ リエクスプレイン",j:"多くが間違えたら、説明し直すのは私の役目です。"},
+ {c:"quiz",aud:"t",en:"Type any answer in the chat—every answer is welcome.",k:"タイプ エニー アンサー イン ザ チャット—エヴリ アンサー イズ ウェルカム",j:"チャットにどんな答えでもどうぞ。歓迎します。"},
+ {c:"quiz",aud:"t",en:"There are no silly questions here.",k:"ゼア アー ノー シリー クエスチョンズ ヒア",j:"くだらない質問なんて、ありません。"},
+ {c:"quiz",aud:"t",en:"Getting it wrong now means we fix it before it matters.",k:"ゲッティング イット ロング ナウ ミーンズ ウィー フィックス イット ビフォア イット マターズ",j:"今まちがえれば、大事になる前に直せます。"},
+ {c:"quiz",aud:"t",en:"Show of hands—who'd like a quick recap?",k:"ショウ オブ ハンズ—フード ライク ア クウィック リキャップ？",j:"挙手で。軽くおさらいしたい人？"},
+ {c:"quiz",aud:"t",en:"Whatever you pick is fine—let's just see where we are.",k:"ワットエヴァー ユー ピック イズ ファイン—レッツ ジャスト スィー ウェア ウィー アー",j:"どれを選んでもOK。今の到達度を見るだけです。"},
+ {c:"quiz",aud:"t",en:"Great—now I know exactly what to review with you.",k:"グレイト—ナウ アイ ノウ イグザクトリー ワット トゥ レヴュー ウィズ ユー",j:"助かります。どこを復習すべきか、はっきりしました。"},
+
+ // ====== ㉑ 解答・採点・フィードバック（GRADE） ======
+ {c:"grade",aud:"t",en:"Let's go over the answers together.",k:"レッツ ゴー オーヴァー ジ アンサーズ トゥゲザー",j:"いっしょに解答を確認しましょう。"},
+ {c:"grade",aud:"t",en:"The correct answer is B—and here's why.",k:"ザ コレクト アンサー イズ ビー—アンド ヒアズ ホワイ",j:"正解はBです。理由はこちら。"},
+ {c:"grade",aud:"t",en:"Many of you got this right—nice work!",k:"メニー オブ ユー ガット ディス ライト—ナイス ワーク！",j:"多くの人が正解。よくできました！"},
+ {c:"grade",aud:"t",en:"This one was tricky, so don't worry if you missed it.",k:"ディス ワン ワズ トリッキー、ソー ドント ワリー イフ ユー ミスト イット",j:"これは難問。間違えても気にしないで。"},
+ {c:"grade",aud:"t",en:"Your reasoning was solid, even if the answer was off.",k:"ユア リーズニング ワズ ソリッド、イーヴン イフ ジ アンサー ワズ オフ",j:"答えがずれても、考え方はしっかりしていました。"},
+ {c:"grade",aud:"t",en:"Partial credit for the right approach!",k:"パーシャル クレジット フォー ザ ライト アプローチ！",j:"アプローチが正しいので部分点です！"},
+ {c:"grade",aud:"t",en:"Let me share some feedback on common mistakes.",k:"レッ ミー シェア サム フィードバック オン コモン ミステイクス",j:"よくある間違いについて、少し共有します。"},
+ {c:"grade",aud:"t",en:"Let's turn this mistake into a learning point.",k:"レッツ ターン ディス ミステイク イントゥ ア ラーニング ポイント",j:"この間違いを、学びのポイントに変えましょう。"},
+ {c:"grade",aud:"t",en:"Overall, the class did really well today.",k:"オーヴァオール、ザ クラス ディッ リアリー ウェル トゥデイ",j:"全体として、今日はとてもよくできました。"},
+
+ // ====== ㉒ 時間・進行（TIMING） ======
+ {c:"timing",aud:"t",en:"We have ten minutes left for this section.",k:"ウィー ハヴ テン ミニッツ レフト フォー ディス セクション",j:"このセクションは残り10分です。"},
+ {c:"timing",aud:"t",en:"Let's spend five more minutes, then move on.",k:"レッツ スペンド ファイヴ モア ミニッツ、ゼン ムーヴ オン",j:"あと5分やって、次に進みましょう。"},
+ {c:"timing",aud:"t",en:"We're a little behind, so let's pick up the pace.",k:"ウィア ア リトル ビハインド、ソー レッツ ピック アップ ザ ペイス",j:"少し遅れ気味なので、ペースを上げましょう。"},
+ {c:"timing",aud:"t",en:"Take five minutes to try it yourself.",k:"テイク ファイヴ ミニッツ トゥ トライ イット ユアセルフ",j:"5分とって、自分で試してみてください。"},
+ {c:"timing",aud:"t",en:"I'll give you a two-minute warning before we wrap up.",k:"アイル ギヴ ユー ア トゥーミニット ワーニング ビフォア ウィー ラップ アップ",j:"締める2分前に声をかけますね。"},
+ {c:"timing",aud:"t",en:"We're ahead of schedule—great work, everyone.",k:"ウィア アヘッド オブ スケジュール—グレイト ワーク、エヴリワン",j:"予定より早いです。みんな素晴らしい。"},
+ {c:"timing",aud:"t",en:"Let's keep an eye on the time.",k:"レッツ キープ アン アイ オン ザ タイム",j:"時間に気をつけていきましょう。"},
+ {c:"timing",aud:"t",en:"No rush—we can extend this by a few minutes.",k:"ノー ラッシュ—ウィー キャン エクステンド ディス バイ ア フュー ミニッツ",j:"焦らずに。数分なら延ばせますよ。"},
+ {c:"timing",aud:"l",en:"How much time do we have left?",k:"ハウ マッチ タイム ドゥ ウィー ハヴ レフト？",j:"あと、どれくらい時間がありますか？"},
+];
+const AUDTAG={l:["l","🎓受講生"],t:["t","🏫講師"],b:["b","👥両方"]};
+const CATNAME={tool:"ツール",rensou:"報連相",confirm:"確認",mtg:"MTG・連絡",python:"Python",lpic:"LPIC",trouble:"トラブル",preempt:"先回り",progress:"進捗・日報",biz:"研修ビジネス",coach:"コーチング",hint:"学習ヒント",oral:"口頭試問",written:"筆記試験",quiz:"理解度クイズ",grade:"解答・採点",timing:"時間・進行"};
+
+/* ---- audience ---- */
+let AUD="all";
+function setAud(a){AUD=a;$('#aAll').setAttribute('aria-pressed',a==="all");$('#aL').setAttribute('aria-pressed',a==="l");$('#aT').setAttribute('aria-pressed',a==="t");renderAll();}
+$('#aAll').onclick=()=>setAud("all");$('#aL').onclick=()=>setAud("l");$('#aT').onclick=()=>setAud("t");
+const showAud=p=>AUD==="all"||p.aud===AUD||p.aud==="b";
+
+/* ---- card ---- */
+function card(p){
+  const at=AUDTAG[p.aud];
+  return `<div class="card"><div class="meta">
+    ${p.t?`<span class="tag tool">${esc(p.t)}</span>`:""}
+    <span class="tag ${at[0]}">${at[1]}</span></div>
+    <div class="en">${esc(p.en)}</div><div class="kana">🗣 ${esc(p.k)}</div><div class="ja">${esc(p.j)}</div>
+    <div class="row"><button class="b1" data-copy="${encodeURIComponent(p.en)}">📋 コピー</button>
+      <button class="b2" data-say="${encodeURIComponent(p.en)}">🔊 発音</button></div></div>`;
+}
+function cardCat(p){
+  const at=AUDTAG[p.aud];
+  return `<div class="card"><div class="meta">
+    <span class="tag" style="background:var(--purple)">${esc(CATNAME[p.c]||p.c)}</span>
+    ${p.t?`<span class="tag tool">${esc(p.t)}</span>`:""}
+    <span class="tag ${at[0]}">${at[1]}</span></div>
+    <div class="en">${esc(p.en)}</div><div class="kana">🗣 ${esc(p.k)}</div><div class="ja">${esc(p.j)}</div>
+    <div class="row"><button class="b1" data-copy="${encodeURIComponent(p.en)}">📋 コピー</button>
+      <button class="b2" data-say="${encodeURIComponent(p.en)}">🔊 発音</button></div></div>`;
+}
+function bind(root){
+  root.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)));
+  root.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>speak(decodeURIComponent(b.dataset.say)));
+}
+
+/* ---- tool tab ---- */
+let tool="all";
+function renderTool(){
+  const tools=["all","Zoom","Meet","oVice","Slack"];
+  $('#toolChips').innerHTML=tools.map(t=>`<button class="chip" data-t="${t}" aria-pressed="${t===tool}">${t==="all"?"ぜんぶ":t}</button>`).join("");
+  $('#toolChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{tool=c.dataset.t;renderTool();});
+  const list=P.filter(p=>p.c==="tool"&&showAud(p)&&(tool==="all"||p.t===tool));
+  $('#toolList').innerHTML=list.length?list.map(card).join(""):`<div class="note">この条件のフレーズはありません。目線やツールを変えてみてね🐰</div>`;
+  bind($('#toolList'));
+}
+/* ---- grouped tabs ---- */
+function renderGrouped(cat,elId){
+  const items=P.filter(p=>p.c===cat&&showAud(p));
+  const subs=[...new Set(items.map(p=>p.sub))];
+  $(elId).innerHTML=subs.length?subs.map(s=>`<div class="catlabel">${esc(s)}</div>`+items.filter(p=>p.sub===s).map(card).join("")).join("")
+    :`<div class="note">この目線のフレーズはありません。「両方」に戻すと表示されます🐰</div>`;
+  bind($(elId));
+}
+/* ---- flat tabs (no sub) ---- */
+function renderFlat(cat,elId){
+  const items=P.filter(p=>p.c===cat&&showAud(p));
+  $(elId).innerHTML=items.length?items.map(card).join(""):`<div class="note">この目線のフレーズはありません。「両方」に戻すと表示されます🐰</div>`;
+  bind($(elId));
+}
+function renderPreempt(){const items=P.filter(p=>p.c==="preempt");$('#preemptList').innerHTML=items.map(card).join("");bind($('#preemptList'));}
+
+/* ---- ⑮ learner / ⑯ teacher 横断 ---- */
+let learnerCat="all",teacherCat="all";
+function renderLearner(){
+  const items=P.filter(p=>p.aud==="l"||p.aud==="b");
+  const cats=["all",...[...new Set(items.map(p=>p.c))]];
+  $('#learnerChips').innerHTML=cats.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${c===learnerCat}">${c==="all"?"ぜんぶ":(CATNAME[c]||c)}</button>`).join("");
+  $('#learnerChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{learnerCat=c.dataset.c;renderLearner();});
+  const list=items.filter(p=>learnerCat==="all"||p.c===learnerCat);
+  $('#learnerList').innerHTML=`<div class="note">${list.length} フレーズ</div>`+list.map(cardCat).join("");
+  bind($('#learnerList'));
+}
+function renderTeacher(){
+  const items=P.filter(p=>p.aud==="t"||p.aud==="b");
+  const cats=["all",...[...new Set(items.map(p=>p.c))]];
+  $('#teacherChips').innerHTML=cats.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${c===teacherCat}">${c==="all"?"ぜんぶ":(CATNAME[c]||c)}</button>`).join("");
+  $('#teacherChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{teacherCat=c.dataset.c;renderTeacher();});
+  const list=items.filter(p=>teacherCat==="all"||p.c===teacherCat);
+  $('#teacherList').innerHTML=`<div class="note">${list.length} フレーズ</div>`+list.map(cardCat).join("");
+  bind($('#teacherList'));
+}
+
+function renderAll(){
+  renderTool();
+  renderGrouped("rensou","#rensouList");renderGrouped("confirm","#confirmList");renderGrouped("mtg","#mtgList");
+  renderGrouped("python","#pythonList");renderGrouped("lpic","#lpicList");renderGrouped("trouble","#troubleList");
+  renderPreempt();renderGrouped("progress","#progressList");renderGrouped("biz","#bizList");
+  renderGrouped("coach","#coachList");renderGrouped("hint","#hintList");
+  renderFlat("oral","#oralList");renderFlat("written","#writtenList");renderFlat("quiz","#quizList");
+  renderFlat("grade","#gradeList");renderFlat("timing","#timingList");
+  renderLearner();renderTeacher();
+}
+
+/* ---- 暗記テスト ---- */
+const SCOPES=[["all","ぜんぶ"],["tool","ツール"],["rensou","報連相"],["confirm","確認"],["mtg","MTG"],["progress","進捗・日報"],["biz","研修ビジネス"],["coach","コーチング"],["hint","学習ヒント"],["python","Python"],["lpic","LPIC"],["trouble","トラブル"],["preempt","先回り"],["oral","口頭試問"],["written","筆記試験"],["quiz","理解度クイズ"],["grade","解答・採点"],["timing","時間・進行"]];
+let quiz={scope:"all",dir:"ja2en",q:[],i:0,score:0,correctList:[],wrongList:[]};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const QCORRECT=["⭕ 正解！ いいね🐰","⭕ ばっちり！その調子✨","⭕ すばらしい！よく覚えてたね🌸","⭕ 大正解！自信もって"];
+const QMISS=["ナイストライ！間違いは“伸びるサイン”🐰","いい挑戦！答えを知った今が、いちばん伸びる時✨","だいじょうぶ。ここを覚えれば、もう得意分野🌷","おしい！方向は合ってる。次はきっといける💪"];
+function initTest(){
+  $('#testScope').innerHTML=SCOPES.map(s=>`<button class="chip" data-s="${s[0]}" aria-pressed="${s[0]===quiz.scope}">${s[1]}</button>`).join("");
+  $('#testScope').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{quiz.scope=c.dataset.s;initTest();});
+}
+$('#dirJaEn').onclick=()=>{quiz.dir="ja2en";$('#dirJaEn').setAttribute('aria-pressed','true');$('#dirEnJa').setAttribute('aria-pressed','false');};
+$('#dirEnJa').onclick=()=>{quiz.dir="en2ja";$('#dirEnJa').setAttribute('aria-pressed','true');$('#dirJaEn').setAttribute('aria-pressed','false');};
+$('#testStart').onclick=startQuiz;
+function makeQ(items,pool,dir){
+  const ansF=dir==="ja2en"?"en":"j", promF=dir==="ja2en"?"j":"en";
+  return items.map(correct=>{
+    const others=pool.filter(p=>p[ansF]!==correct[ansF]).sort(()=>Math.random()-0.5).slice(0,3);
+    const opts=[correct[ansF],...others.map(p=>p[ansF])].sort(()=>Math.random()-0.5);
+    return {prompt:correct[promF],kana:correct.k,answer:correct[ansF],opts,src:correct};
+  });
+}
+function startQuiz(){
+  let pool=P.filter(p=>(quiz.scope==="all"||p.c===quiz.scope)&&p.en&&p.j);
+  if(pool.length<4){$('#testBody').innerHTML='<div class="note">この範囲は問題が少なめ。「ぜんぶ」か別の範囲を選んでね🐰</div>';return;}
+  const shuf=[...pool].sort(()=>Math.random()-0.5);
+  quiz.q=makeQ(shuf.slice(0,Math.min(8,shuf.length)),pool,quiz.dir);
+  quiz.i=0;quiz.score=0;quiz.correctList=[];quiz.wrongList=[];renderQ();
+}
+function startWeakQuiz(){
+  if(!weakList.length){toast("弱点リストは空です🐰");return;}
+  const pool=P.filter(p=>p.en&&p.j);
+  const items=[...weakList].sort(()=>Math.random()-0.5).slice(0,Math.min(10,weakList.length));
+  quiz.q=makeQ(items,pool,quiz.dir);
+  quiz.i=0;quiz.score=0;quiz.correctList=[];quiz.wrongList=[];renderQ();
+  document.getElementById('testBody').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderQ(){
+  if(quiz.i>=quiz.q.length)return endQuiz();
+  const q=quiz.q[quiz.i], enOpt=quiz.dir==="ja2en";
+  $('#testBody').innerHTML=`<div class="qcard">
+    <div class="qprog"><i style="width:${quiz.i/quiz.q.length*100}%"></i></div>
+    <div class="note">第 ${quiz.i+1} 問 / ${quiz.q.length}　・　スコア ${quiz.score}</div>
+    <div class="qprompt">${esc(q.prompt)}</div>
+    ${(!enOpt&&q.kana)?`<div class="qkana">🗣 ${esc(q.kana)}</div>`:""}
+    <div id="qopts">${q.opts.map((o,i)=>`<button class="qopt ${enOpt?'en':''}" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="qfb" id="qfb"></div></div>`;
+  $('#qopts').querySelectorAll('.qopt').forEach(b=>b.onclick=()=>answer(b,q));
+  if(autoPlay&&quiz.dir==="en2ja")speak(q.prompt);
+}
+function answer(btn,q){
+  const chosen=q.opts[+btn.dataset.i], correct=chosen===q.answer;
+  $('#qopts').querySelectorAll('.qopt').forEach(b=>{b.disabled=true;
+    if(q.opts[+b.dataset.i]===q.answer)b.classList.add('correct');
+    else if(b===btn)b.classList.add('wrong');});
+  if(correct){quiz.score++;quiz.correctList.push(q.src);$('#qfb').innerHTML=`<span style="color:#2f6b4d">${pick(QCORRECT)}</span>`;}
+  else {quiz.wrongList.push(q.src);addWeak(q.src);$('#qfb').innerHTML=`<span style="color:var(--rose-dp);font-weight:800">${pick(QMISS)}</span><br>正解は <b>${esc(q.answer)}</b>　— おぼえ直せば、ちゃんと身につくよ🐰`;}
+  const nb=document.createElement('button');nb.className="b1";nb.style.marginTop="10px";
+  nb.textContent=quiz.i===quiz.q.length-1?"結果を見る 🎉":"次の問題 →";
+  nb.onclick=()=>{quiz.i++;renderQ();};
+  $('#qfb').appendChild(document.createElement('br'));$('#qfb').appendChild(nb);
+}
+function endQuiz(){
+  const n=quiz.q.length, s=quiz.score, pct=Math.round(s/n*100);
+  lastResults={correct:quiz.correctList.slice(),incorrect:quiz.wrongList.slice(),n,score:s,pct};
+  const msg=pct>=80?"お見事！よく覚えてるね🌸":pct>=50?"いい調子！あと少しで完璧✨":"ここからが伸びどき。くり返せば必ず定着🐰";
+  $('#testBody').innerHTML=`<div class="qend"><div class="big">${s} / ${n} 正解（${pct}%）</div>
+    <div>${msg}</div>
+    <div style="margin-top:8px;font-size:13px;opacity:.95">間違えた問題こそ、いちばん伸びる場所。点数より“次できる”を大事に🐰</div>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="b1" id="qRetry" style="background:var(--gold);color:#3a2a00">もう一回 🔁</button>
+      <button class="b1" id="qSeeFB" style="background:#fff;color:var(--purple)">⑰ 回答FBを見る 📊</button></div></div>`;
+  $('#qRetry').onclick=startQuiz;
+  $('#qSeeFB').onclick=()=>{fbSub="post";gotoTab('fb');};
+}
+
+/* ---- 弱点リスト ---- */
+let weakList=[];
+function addWeak(src){if(src&&!weakList.some(x=>x.en===src.en)){weakList.push({en:src.en,j:src.j,k:src.k,c:src.c});saveWeak();renderWeak();}}
+async function loadWeak(){try{if(window.storage){const r=await window.storage.get("weak_list");weakList=r?JSON.parse(r.value):[];}}catch(e){weakList=[];}renderWeak();}
+async function saveWeak(){try{if(window.storage)await window.storage.set("weak_list",JSON.stringify(weakList.slice(-50)));}catch(e){}}
+function renderWeak(){
+  const el=$('#weakPanel'); if(!el)return;
+  if(!weakList.length){el.innerHTML='<div class="note">📒 弱点リストは空です。テストで間違えた問題が、ここに集まります🐰</div>';return;}
+  el.innerHTML=`<div class="catlabel">📒 弱点リスト（${weakList.length}）</div>`+
+    `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px">
+       <button class="b1" id="weakQuiz">⚡ 弱点だけテスト</button>
+       <button class="b2" id="weakClear">リストをクリア</button></div>`+
+    weakList.map(w=>`<div class="card"><div class="en">${esc(w.en)}</div><div class="kana">🗣 ${esc(w.k||'')}</div><div class="ja">${esc(w.j||'')}</div>
+      <div class="row"><button class="b1" data-say="${encodeURIComponent(w.en)}">🔊 発音</button>
+      <button class="b2" data-copy="${encodeURIComponent(w.en)}">📋 コピー</button></div></div>`).join("");
+  bind(el);
+  $('#weakQuiz').onclick=startWeakQuiz;
+  $('#weakClear').onclick=()=>{weakList=[];saveWeak();renderWeak();toast("弱点リストをクリアしました");};
+}
+
+/* ---- ⑰ 回答フィードバック ---- */
+let fbSub="pre", fbScope="all";
+let lastResults=null; // {correct:[], incorrect:[], n, score, pct}
+$$('.subtab').forEach(s=>s.onclick=()=>{
+  $$('.subtab').forEach(x=>x.setAttribute('aria-selected','false'));s.setAttribute('aria-selected','true');
+  fbSub=s.dataset.sub;renderFB();
+});
+function renderFB(){
+  $$('.subtab').forEach(x=>x.setAttribute('aria-selected', x.dataset.sub===fbSub?'true':'false'));
+  if(fbSub==="pre")renderFBpre(); else renderFBpost();
+}
+function renderFBpre(){
+  $('#fbPre').style.display="block";$('#fbPost').style.display="none";
+  $('#fbPre').innerHTML=`
+   <p class="lead">出題範囲を選んで、出るフレーズを先にプレビュー。準備ができたら⑭テストへワンクリック。</p>
+   <div class="chips" id="fbScopeChips"></div>
+   <div style="margin:6px 0 12px"><button class="b1" id="fbGoTest" style="background:var(--purple)">▶ この範囲で⑭テストへ</button></div>
+   <div id="fbPreList"></div>`;
+  $('#fbScopeChips').innerHTML=SCOPES.map(s=>`<button class="chip" data-s="${s[0]}" aria-pressed="${s[0]===fbScope}">${s[1]}</button>`).join("");
+  $('#fbScopeChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{fbScope=c.dataset.s;renderFBpre();});
+  const list=P.filter(p=>(fbScope==="all"||p.c===fbScope)&&p.en&&p.j);
+  $('#fbPreList').innerHTML=`<div class="note">この範囲：${list.length} フレーズ（4択で出題されます）</div>`+list.map(card).join("");
+  bind($('#fbPreList'));
+  $('#fbGoTest').onclick=()=>{quiz.scope=fbScope;initTest();gotoTab('test');setTimeout(startQuiz,150);};
+}
+function renderFBpost(){
+  $('#fbPre').style.display="none";$('#fbPost').style.display="block";
+  if(!lastResults){$('#fbPost').innerHTML='<div class="note">📊 まだテスト結果がありません。⑭テストを1回受けると、ここに正解／不正解のまとめが出ます🐰</div>';return;}
+  const r=lastResults;
+  $('#fbPost').innerHTML=`
+   <div class="statbar">
+     <div class="stat ok"><span class="n">${r.correct.length}</span>正解</div>
+     <div class="stat ng"><span class="n">${r.incorrect.length}</span>不正解</div>
+     <div class="stat pct"><span class="n">${r.pct}%</span>正答率</div>
+   </div>
+   ${r.incorrect.length?`<div style="margin:6px 0 14px"><button class="b1" id="fbRetryWrong" style="background:var(--purple)">⚡ 不正解だけ もう一度テスト</button></div>`:`<div class="note">🎉 全問正解！この範囲はばっちりです🐰</div>`}
+   ${r.incorrect.length?`<div class="catlabel" style="color:#A23A48;border-color:#FBE0E0">❌ 不正解（${r.incorrect.length}）— ここが伸びしろ🐰</div>`+r.incorrect.map(p=>fbCard('ng',p)).join(""):""}
+   ${r.correct.length?`<div class="catlabel" style="color:#2f6b4d;border-color:#DDF0E5">⭕ 正解（${r.correct.length}）— よく覚えてたね🌸</div>`+r.correct.map(p=>fbCard('ok',p)).join(""):""}`;
+  bind($('#fbPost'));
+  const rb=$('#fbRetryWrong'); if(rb)rb.onclick=()=>{
+    quiz.q=makeQ([...r.incorrect].sort(()=>Math.random()-0.5),P.filter(p=>p.en&&p.j),quiz.dir);
+    quiz.i=0;quiz.score=0;quiz.correctList=[];quiz.wrongList=[];gotoTab('test');renderQ();
+  };
+}
+function fbCard(kind,p){
+  return `<div class="card" style="border-left:5px solid ${kind==='ok'?'#4F8A6B':'#E5557A'}">
+    <div class="en">${esc(p.en)}</div><div class="kana">🗣 ${esc(p.k||'')}</div><div class="ja">${esc(p.j||'')}</div>
+    <div class="row"><button class="b2" data-say="${encodeURIComponent(p.en)}">🔊 発音</button>
+    <button class="b2" data-copy="${encodeURIComponent(p.en)}">📋 コピー</button></div></div>`;
+}
+
+/* ---- speech ---- */
+let voices=[],chosen=null;
+const vSel=$('#voiceSel'),rate=$('#rate'),rateVal=$('#rateVal');
+rate.oninput=()=>rateVal.textContent=(+rate.value).toFixed(2)+"x";
+let showKana=true, autoPlay=false;
+$('#kanaToggle').onclick=()=>{showKana=!showKana;document.body.classList.toggle('no-kana',!showKana);
+  $('#kanaToggle').setAttribute('aria-pressed',showKana);
+  $('#kanaToggle').textContent=showKana?'フリガナ：表示':'フリガナ：OFF（🔊英語の音で）';
+  if(!showKana && !autoPlay){autoPlay=true;$('#autoToggle').setAttribute('aria-pressed','true');$('#autoToggle').textContent='🔊自動再生：ON';}
+  toast(showKana?'フリガナを表示します':'英語の音（🔊）に合わせよう！自動再生ONにしたよ');};
+$('#autoToggle').onclick=()=>{autoPlay=!autoPlay;$('#autoToggle').setAttribute('aria-pressed',autoPlay);$('#autoToggle').textContent='🔊自動再生：'+(autoPlay?'ON':'OFF');};
+function loadVoices(){
+  if(!('speechSynthesis'in window)){vSel.innerHTML='<option>音声非対応</option>';vSel.disabled=true;return;}
+  voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  if(!voices.length){vSel.innerHTML='<option>英語音声なし</option>';return;}
+  const ord=v=>({"en-US":0,"en-GB":1,"en-AU":2}[v.lang]??3);voices.sort((a,b)=>ord(a)-ord(b));
+  const lab=v=>({"en-US":"アメリカ🇺🇸","en-GB":"イギリス🇬🇧","en-AU":"豪🇦🇺"}[v.lang]||v.lang)+" — "+v.name.replace(/Microsoft |Google /,'');
+  vSel.innerHTML=voices.map((v,i)=>`<option value="${i}">${lab(v)}</option>`).join("");chosen=voices[0];
+  vSel.onchange=()=>chosen=voices[+vSel.value];
+}
+if('speechSynthesis'in window){speechSynthesis.onvoiceschanged=loadVoices;loadVoices();}else loadVoices();
+function speak(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);if(chosen){u.voice=chosen;u.lang=chosen.lang;}else u.lang="en-US";u.rate=+rate.value;speechSynthesis.speak(u);}
+
+/* ---- pronunciation FB ---- */
+function fillPron(){$('#pronSel').innerHTML=P.map((p,i)=>`<option value="${i}">${esc(p.en)}</option>`).join("");}
+$('#pPlay').onclick=()=>{const p=P[+$('#pronSel').value];if(p)speak(p.en);};
+$('#pronSel').onchange=()=>{if(autoPlay){const p=P[+$('#pronSel').value];if(p)speak(p.en);}};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,recording=false;
+if(SR){rec=new SR();rec.lang="en-US";rec.interimResults=false;rec.maxAlternatives=1;
+  rec.onresult=e=>{const h=e.results[0][0].transcript;$('#heard').textContent="🗣 あなた: 「"+h+"」";grade(h);};
+  rec.onerror=()=>{stopRec();$('#pronNote').textContent="うまく聞き取れなかったみたい。もう一度か、下の入力でもOK🐰";$('#manualWrap').style.display="flex";};
+  rec.onend=()=>stopRec();
+}else{$('#pronNote').textContent="この端末は音声入力に未対応。下のテキスト入力で添削できるよ。";$('#manualWrap').style.display="flex";}
+function stopRec(){recording=false;$('#pMic').classList.remove('rec');$('#pMic').textContent="🎤 話す";}
+$('#pMic').onclick=()=>{
+  if(!rec){$('#manualWrap').style.display="flex";return;}
+  if(recording){rec.stop();return;}
+  const p=P[+$('#pronSel').value];if(!p)return;
+  try{recording=true;$('#pMic').classList.add('rec');$('#pMic').textContent="● 録音中…";$('#heard').textContent="";speak(p.en);setTimeout(()=>{try{rec.start()}catch(e){}},800);}
+  catch(e){stopRec();$('#manualWrap').style.display="flex";}
+};
+$('#manualGo').onclick=()=>{const v=$('#manualIn').value.trim();if(v){$('#heard').textContent="🗣 あなた: 「"+v+"」";grade(v);}};
+
+async function callClaude(user){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
+      system:"あなたは『うさうさ先生』、やさしく明るいAI英語発音コーチ。日本語で、ほめて伸ばし、否定しない。",
+      messages:[{role:"user",content:user}]})});
+  if(!res.ok)throw new Error("api");
+  const d=await res.json();let t=(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").replace(/```json|```/g,"").trim();
+  return JSON.parse(t);
+}
+async function grade(heard){
+  const p=P[+$('#pronSel').value];
+  $('#fbArea').innerHTML='<div class="note"><span class="spin"></span> うさうさ先生が聞いています…</div>';
+  let fb;
+  try{
+    fb=await callClaude(`お手本:"${p.en}" / 学習者が言った内容(音声認識):"${heard}"。発音・言い方を日本語で短く、ほめて伸ばす形で添削。`+
+      `JSONのみ:{"score":0から100の整数,"good":"良かった点","fix":"やさしい直し方","cheer":"ひとこと"}`);
+  }catch(e){
+    const ok=heard.toLowerCase().replace(/[^a-z ]/g,"").trim()===p.en.toLowerCase().replace(/[^a-z ]/g,"").trim();
+    fb={score:ok?94:72,good:ok?"お手本どおり、はっきり言えています！":"声に出してチャレンジできたのが素晴らしい",
+        fix:ok?"このまま自信を持って大丈夫":"単語の区切りをゆっくり、母音をはっきりめに",cheer:"その調子だよ🐰"};
+    $('#pronNote').textContent="いまAIに繋がらないので、簡易フィードバックを表示中。";
+  }
+  const col=fb.score>=85?"var(--rose)":fb.score>=60?"var(--gold)":"#E5557A";
+  $('#fbArea').innerHTML=`<div class="fb"><div class="score" style="border-color:${col};color:${col}">${fb.score}</div>
+    <div class="fbtxt"><b>👍 ${esc(fb.good||"")}</b><br>🔧 ${esc(fb.fix||"")}<br>🐰 ${esc(fb.cheer||"")}</div></div>`;
+}
+
+/* ---- tabs ---- */
+function gotoTab(v){
+  $$('.tab').forEach(x=>x.setAttribute('aria-selected', x.dataset.v===v?'true':'false'));
+  $$('.view').forEach(x=>x.classList.remove('active'));$('#v-'+v).classList.add('active');
+  if(v==='pron')fillPron();
+  if(v==='fb')renderFB();
+  if(v==='learner')renderLearner();
+  if(v==='teacher')renderTeacher();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$$('.tab').forEach(t=>t.onclick=()=>gotoTab(t.dataset.v));
+
+/* init */
+renderAll(); initTest(); loadWeak();
+</script>
+</body>
+</html>
